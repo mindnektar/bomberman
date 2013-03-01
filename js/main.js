@@ -1,84 +1,34 @@
 $(function() {
     var me = location.href.split('?')[1],
 
-        players = {
-            blue: $('#blue'),
-            red: $('#red')
-        },
+        speed = 4,
 
-        pressed = {},
         ws,
-        moveMap = {},
-
-        Key = {
-            UP: 87,
-            RIGHT: 68,
-            DOWN: 83,
-            LEFT: 65
-        },
-
-        pos = {
-            blue: {
-                left: 128,
-                top: 128
-            },
-            red: {
-                left: 800,
-                top: 640
-            }
-        },
-
-        speed = 4;
+        level,
+        input,
+        players = {};
 
     (function init() {
         ws = $.socketio(me, {
             position: position
         });
 
-        moveMap[Key.UP] = [0, -1];
-        moveMap[Key.RIGHT] = [1, 0];
-        moveMap[Key.DOWN] = [0, 1];
-        moveMap[Key.LEFT] = [-1, 0];
+        level = new Level();
+        level.build('empty');
 
-        $(window)
-            .keydown(function(e) {
-                if (!moveMap[e.which]) {
-                    return;
-                }
+        input = new Input();
 
-                if (!pressed[e.which]) {
-                    pressed[e.which] = true;
-                }
-            })
-            .keyup(function(e) {
-                if (!moveMap[e.which]) {
-                    return;
-                }
-
-                if (pressed[e.which]) {
-                    delete pressed[e.which];
-                }
-            });
+        players.blue = new Player('blue', {left: 128, top: 128});
+        players.red = new Player('red', {left: 256, top: 256});
 
         setInterval(frame, 40);
     })();
 
     function frame() {
-        var movement = {left: 0, top: 0};
+        var movement = input.getMovement(speed),
+            newPosition = players[me].move(movement);
 
-        $.each(pressed, function(key) {
-            if (moveMap[key]) {
-                movement.left = moveMap[key][0] * speed;
-                movement.top = moveMap[key][1] * speed;
-            }
-        });
-
-        pos[me].left += movement.left;
-        pos[me].top += movement.top;
-
-        moveOnMap(me);
-
-        ws.emit('position', {position: pos[me]});
+        ws.emit('position', {position: newPosition});
     }
 
     function position(data) {
@@ -86,12 +36,6 @@ $(function() {
             return;
         }
 
-        pos[data.who] = data.position;
-
-        moveOnMap(data.who);
-    }
-
-    function moveOnMap(player) {
-        players[player].css(pos[player]);
+        players[data.who].setPosition(data.position);
     }
 });

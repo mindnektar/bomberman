@@ -14,6 +14,10 @@
     width: 32px;
 }
 
+.tile.fixed {
+    background: #72a850;
+}
+
 .player {
     height: 64px;
     position: absolute;
@@ -22,12 +26,8 @@
 
 #blue {
     background: #09f;
-    left: 128px;
-    top: 128px;
 }
 
 #red {
     background: #f00;
-    left: 256px;
-    top: 256px;
 }

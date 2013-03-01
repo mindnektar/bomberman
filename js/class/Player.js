@@ -1,9 +1,13 @@
 (function($) {
-    Player = function(player, position, bounds) {
-        this.$player = $('#' + player);
+    Player = function(player, position, level) {
+        this.$player = $('<div id="' + player + '" class="player"></div>');
 
         this.position = position;
-        this.bounds = bounds;
+        this.bounds = level.getBounds();
+
+        this._putOnMap();
+
+        level.$level.append(this.$player);
     };
 
     Player.prototype.setPosition = function(position) {

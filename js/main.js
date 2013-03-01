@@ -16,13 +16,12 @@ $(function() {
         });
 
         level = new Level();
-        level.build('empty');
-        bounds = level.getBounds();
+        level.build('blocktest');
 
         input = new Input();
 
-        players.blue = new Player('blue', {left: 128, top: 128}, bounds);
-        players.red = new Player('red', {left: 256, top: 256}, bounds);
+        players.blue = new Player('blue', {left: 64, top: 128}, level);
+        players.red = new Player('red', {left: 256, top: 256}, level);
 
         setInterval(frame, 40);
     })();

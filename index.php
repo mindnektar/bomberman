@@ -18,10 +18,7 @@ header('Content-Type: text/html; charset=utf-8');
 <body>
 
 <div class="wrapper">
-    <div id="level">
-        <div id="blue" class="player"></div>
-        <div id="red" class="player"></div>
-    </div>
+    <div id="level"></div>
 </div>
 
 </body>

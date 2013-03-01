@@ -1,9 +1,10 @@
 (function($) {
-    Player = function(player, position, level) {
+    Player = function(player, position, level, onDeath) {
         this.$player = $('<div id="' + player + '" class="player"></div>');
 
         this.position = position;
         this.level = level;
+        this.onDeath = onDeath;
 
         this.skills = {
             bombs: 3,
@@ -15,6 +16,8 @@
             wins: 0,
             kills: 0
         };
+
+        this.dead = false;
 
         this._putOnMap();
 
@@ -55,6 +58,11 @@
     };
 
     Player.prototype.move = function(movement) {
+        if (this.dead) {
+            return this.position;
+        }
+
+        this._checkDetonationCollision(movement);
         movement = this._checkBoundsCollision(movement);
         movement = this._checkTileCollision(movement);
 
@@ -64,6 +72,12 @@
         this._putOnMap();
 
         return this.position;
+    };
+
+    Player.prototype.die = function() {
+        this.$player.fadeOut(1000);
+
+        this.dead = true;
     };
 
     /* Private */
@@ -101,7 +115,6 @@
     Player.prototype._checkTileCollision = function(movement) {
         var pos = this.getPositionOnMap(),
             newPos = this.getPositionOnMap(movement),
-            newMovement = $.extend({}, movement),
             trav;
 
         if (movement.left < 0) {
@@ -111,19 +124,19 @@
             };
 
             if (!trav.topLeft || !trav.bottomLeft) {
-                newMovement.left = pos.left * 32 - (this.position.left + collision.left);
+                movement.left = pos.left * 32 - (this.position.left + collision.left);
 
-                if (newMovement.left + this.skills.speed < 0) {
-                    newMovement.left = -this.skills.speed;
+                if (movement.left + this.skills.speed < 0) {
+                    movement.left = -this.skills.speed;
                 }
 
-                if (!movement.top && newMovement.left > -this.skills.speed) {
+                if (movement.left > -this.skills.speed) {
                     if (!trav.topLeft && trav.bottomLeft) {
-                        newMovement.top = newMovement.left + this.skills.speed;
+                        movement.top = movement.left + this.skills.speed;
                     }
 
                     if (trav.topLeft && !trav.bottomLeft) {
-                        newMovement.top = -(newMovement.left + this.skills.speed);
+                        movement.top = -(movement.left + this.skills.speed);
                     }
                 }
             }
@@ -134,19 +147,19 @@
             };
 
             if (!trav.topRight || !trav.bottomRight) {
-                newMovement.left = pos.right * 32 - (this.position.left + collision.left - 3);
+                movement.left = pos.right * 32 - (this.position.left + collision.left - 3);
 
-                if (newMovement.left - this.skills.speed > 0) {
-                    newMovement.left = this.skills.speed;
+                if (movement.left - this.skills.speed > 0) {
+                    movement.left = this.skills.speed;
                 }
 
-                if (!movement.top && newMovement.left < this.skills.speed) {
+                if (movement.left < this.skills.speed) {
                     if (!trav.topRight && trav.bottomRight) {
-                        newMovement.top = newMovement.left + this.skills.speed;
+                        movement.top = movement.left + this.skills.speed;
                     }
 
                     if (trav.topRight && !trav.bottomRight) {
-                        newMovement.top = -(newMovement.left + this.skills.speed);
+                        movement.top = -(movement.left + this.skills.speed);
                     }
                 }
             }
@@ -157,19 +170,19 @@
             };
 
             if (!trav.topLeft || !trav.topRight) {
-                newMovement.top = pos.top * 32 - (this.position.top + collision.top);
+                movement.top = pos.top * 32 - (this.position.top + collision.top);
 
-                if (newMovement.top + this.skills.speed < 0) {
-                    newMovement.top = -this.skills.speed;
+                if (movement.top + this.skills.speed < 0) {
+                    movement.top = -this.skills.speed;
                 }
 
-                if (!movement.left && newMovement.top > -this.skills.speed) {
+                if (movement.top > -this.skills.speed) {
                     if (!trav.topLeft && trav.topRight) {
-                        newMovement.left = newMovement.top + this.skills.speed;
+                        movement.left = movement.top + this.skills.speed;
                     }
 
                     if (trav.topLeft && !trav.topRight) {
-                        newMovement.left = -(newMovement.top + this.skills.speed);
+                        movement.left = -(movement.top + this.skills.speed);
                     }
                 }
             }
@@ -180,25 +193,49 @@
             };
 
             if (!trav.bottomLeft || !trav.bottomRight) {
-                newMovement.top = pos.bottom * 32 - (this.position.top + collision.top - 3);
+                movement.top = pos.bottom * 32 - (this.position.top + collision.top - 3);
 
-                if (newMovement.top - this.skills.speed > 0) {
-                    newMovement.top = this.skills.speed;
+                if (movement.top - this.skills.speed > 0) {
+                    movement.top = this.skills.speed;
                 }
 
-                if (!movement.left && newMovement.top < this.skills.speed) {
+                if (movement.top < this.skills.speed) {
                     if (!trav.bottomLeft && trav.bottomRight) {
-                        newMovement.left = newMovement.top + this.skills.speed;
+                        movement.left = movement.top + this.skills.speed;
                     }
 
                     if (trav.bottomLeft && !trav.bottomRight) {
-                        newMovement.left = -(newMovement.top + this.skills.speed);
+                        movement.left = -(movement.top + this.skills.speed);
                     }
                 }
             }
         }
 
-        return newMovement;
+        return movement;
+    };
+
+    Player.prototype._checkDetonationCollision = function(movement) {
+        var self = this,
+            newPos = this.getPositionOnMap(movement),
+            detonations = {
+                topLeft: this.level.isDetonationOn(newPos.left, newPos.top),
+                topRight: this.level.isDetonationOn(newPos.right, newPos.top),
+                bottomRight: this.level.isDetonationOn(newPos.right, newPos.bottom),
+                bottomLeft: this.level.isDetonationOn(newPos.left, newPos.bottom)
+            };
+
+        $.each(detonations, function(_, who) {
+            if (who) {
+                self._kill(who);
+                return false;
+            }
+        });
+    };
+
+    Player.prototype._kill = function(who) {
+        this.die();
+
+        this.onDeath && this.onDeath(who);
     };
 
     var collision = {

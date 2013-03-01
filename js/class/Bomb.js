@@ -1,5 +1,5 @@
 (function($) {
-    Bomb = function(who, position, level, onDetonate) {
+    Bomb = function(who, power, position, level, onDetonation, onDetonationEnd) {
         var self = this;
 
         this.$bomb = $('<div class="bomb ' + who + '"></div>');
@@ -7,18 +7,32 @@
             .css(position)
             .appendTo(level.$level);
 
-        this.onDetonate = onDetonate;
+        this.power = power;
+        this.onDetonation = onDetonation;
+        this.onDetonationEnd = onDetonationEnd;
 
         this.timer = setTimeout(function() {
             self.detonate();
-        }, 4000);
+        }, 3000);
     };
 
     Bomb.prototype.detonate = function() {
+        var self = this;
+
         clearTimeout(this.timer);
 
         this.$bomb.remove();
 
-        this.onDetonate && this.onDetonate();
+        this.onDetonation && this.onDetonation();
+
+        this.timer = setTimeout(function() {
+            self.remove();
+        }, 1000);
+    };
+
+    Bomb.prototype.remove = function() {
+        clearTimeout(this.timer);
+
+        this.onDetonationEnd && this.onDetonationEnd();
     };
 })(jQuery);

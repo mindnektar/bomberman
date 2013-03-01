@@ -9,7 +9,16 @@ $(function() {
     (function init() {
         ws = $.socketio(me, {
             position: position,
-            dropBomb: dropBomb
+            dropBomb: dropBomb,
+            die: function(data) {
+                if (data.who === me) {
+                    return;
+                }
+
+                players[data.who].die();
+
+                players[data.killer].score.kills++;
+            }
         });
 
         level = new Level();
@@ -17,8 +26,8 @@ $(function() {
 
         input = new Input();
 
-        players.blue = new Player('blue', {left: 64, top: 128}, level);
-        players.red = new Player('red', {left: 256, top: 256}, level);
+        players.blue = new Player('blue', {left: 64, top: 128}, level, onDeath);
+        players.red = new Player('red', {left: 256, top: 256}, level, onDeath);
 
         setInterval(frame, 40);
     })();
@@ -28,15 +37,19 @@ $(function() {
             newPosition = players[me].move(movement),
             centerPositionOnMap = players[me].getCenterPositionOnMap();
 
-        if (input.bombDropped() && !level.isBombOn(centerPositionOnMap) && players[me].skills.bombs) {
+        if (players[me].dead) {
+            return;
+        }
+
+        if (input.bombDropped() && !level.isBombOn(centerPositionOnMap.left, centerPositionOnMap.top) && players[me].skills.bombs) {
 
             players[me].skills.bombs--;
 
-            level.dropBomb(me, centerPositionOnMap, function() {
+            level.dropBomb(me, players[me].skills.power, centerPositionOnMap, function() {
                 players[me].skills.bombs++;
             });
 
-            ws.emit('dropBomb', centerPositionOnMap);
+            ws.emit('dropBomb', {position: centerPositionOnMap});
         }
 
         ws.emit('position', {position: newPosition});
@@ -55,10 +68,11 @@ $(function() {
             return;
         }
 
-        level.dropBomb(data.who, players[data.who].position);
+        level.dropBomb(data.who, players[data.who].skills.power, data.position);
     }
 
-    function bombDetonated() {
-
+    function onDeath(who) {
+        players[who].score.kills++;
+        ws.emit('die', {killer: who});
     }
 });

@@ -27,6 +27,11 @@
         }
     };
 
+
+    Level.prototype.isTraversable = function() {
+
+    };
+
     Level.prototype.isBombOn = function(positionOnMap) {
         return bombs[positionOnMap.left] && bombs[positionOnMap.left][positionOnMap.top];
     };

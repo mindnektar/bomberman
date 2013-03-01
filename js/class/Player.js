@@ -3,8 +3,7 @@
         this.$player = $('<div id="' + player + '" class="player"></div>');
 
         this.position = position;
-        this.bounds = level.getBounds();
-        this.map = level.map;
+        this.level = level;
 
         this.skills = {
             bombs: 1,
@@ -72,20 +71,22 @@
     };
 
     Player.prototype._checkBoundsCollision = function(movement) {
+        var bounds = this.level.getBounds();
+
         if (this.position.left + collision.left + movement.left < 0) {
             movement.left = 0 - (this.position.left + collision.left);
         }
 
-        if (this.position.left + collision.left + collision.width + movement.left > this.bounds.left) {
-            movement.left = this.bounds.left - (this.position.left + collision.left + collision.width);
+        if (this.position.left + collision.left + collision.width + movement.left > bounds.left) {
+            movement.left = bounds.left - (this.position.left + collision.left + collision.width);
         }
 
         if (this.position.top + collision.top + movement.top < 0) {
             movement.top = 0 - (this.position.top + collision.top);
         }
 
-        if (this.position.top + collision.top + collision.height + movement.top > this.bounds.top) {
-            movement.top = this.bounds.top - (this.position.top + collision.top + collision.height);
+        if (this.position.top + collision.top + collision.height + movement.top > bounds.top) {
+            movement.top = bounds.top - (this.position.top + collision.top + collision.height);
         }
 
         return movement;
@@ -98,17 +99,17 @@
         if (
             movement.left < 0 &&
             (
-                this.map[positionOnMap.top][newPositionOnMap.left] ||
-                this.map[positionOnMap.bottom][newPositionOnMap.left] ||
+                this.level.map[positionOnMap.top][newPositionOnMap.left] ||
+                this.level.map[positionOnMap.bottom][newPositionOnMap.left] ||
                 (
                     movement.top &&
                     (
                         (
-                            movement.top < 0 && !this.map[newPositionOnMap.top][positionOnMap.left] ||
-                            movement.top > 0 && !this.map[newPositionOnMap.bottom][positionOnMap.left]
+                            movement.top < 0 && !this.level.map[newPositionOnMap.top][positionOnMap.left] ||
+                            movement.top > 0 && !this.level.map[newPositionOnMap.bottom][positionOnMap.left]
                         ) && (
-                            this.map[newPositionOnMap.top][newPositionOnMap.left] ||
-                            this.map[newPositionOnMap.bottom][newPositionOnMap.left]
+                            this.level.map[newPositionOnMap.top][newPositionOnMap.left] ||
+                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.left]
                         )
                     )
                 )
@@ -118,17 +119,17 @@
         } else if (
             movement.left > 0 &&
             (
-                this.map[positionOnMap.top][newPositionOnMap.right] ||
-                this.map[positionOnMap.bottom][newPositionOnMap.right] ||
+                this.level.map[positionOnMap.top][newPositionOnMap.right] ||
+                this.level.map[positionOnMap.bottom][newPositionOnMap.right] ||
                 (
                     movement.top &&
                     (
                         (
-                            movement.top < 0 && !this.map[newPositionOnMap.top][positionOnMap.right] ||
-                            movement.top > 0 && !this.map[newPositionOnMap.bottom][positionOnMap.right]
+                            movement.top < 0 && !this.level.map[newPositionOnMap.top][positionOnMap.right] ||
+                            movement.top > 0 && !this.level.map[newPositionOnMap.bottom][positionOnMap.right]
                         ) && (
-                            this.map[newPositionOnMap.top][newPositionOnMap.right] ||
-                            this.map[newPositionOnMap.bottom][newPositionOnMap.right]
+                            this.level.map[newPositionOnMap.top][newPositionOnMap.right] ||
+                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.right]
                         )
                     )
                 )
@@ -140,17 +141,17 @@
         if (
             movement.top < 0 &&
             (
-                this.map[newPositionOnMap.top][positionOnMap.left] ||
-                this.map[newPositionOnMap.top][positionOnMap.right] ||
+                this.level.map[newPositionOnMap.top][positionOnMap.left] ||
+                this.level.map[newPositionOnMap.top][positionOnMap.right] ||
                 (
                     movement.left &&
                     (
                         (
-                            movement.left < 0 && !this.map[positionOnMap.top][newPositionOnMap.left] ||
-                            movement.left > 0 && !this.map[positionOnMap.top][newPositionOnMap.right]
+                            movement.left < 0 && !this.level.map[positionOnMap.top][newPositionOnMap.left] ||
+                            movement.left > 0 && !this.level.map[positionOnMap.top][newPositionOnMap.right]
                         ) && (
-                            this.map[newPositionOnMap.top][newPositionOnMap.left] ||
-                            this.map[newPositionOnMap.top][newPositionOnMap.right]
+                            this.level.map[newPositionOnMap.top][newPositionOnMap.left] ||
+                            this.level.map[newPositionOnMap.top][newPositionOnMap.right]
                         )
                     )
                 )
@@ -160,17 +161,17 @@
         } else if (
             movement.top > 0 &&
             (
-                this.map[newPositionOnMap.bottom][positionOnMap.left] ||
-                this.map[newPositionOnMap.bottom][positionOnMap.right] ||
+                this.level.map[newPositionOnMap.bottom][positionOnMap.left] ||
+                this.level.map[newPositionOnMap.bottom][positionOnMap.right] ||
                 (
                     movement.left &&
                     (
                         (
-                            movement.left < 0 && !this.map[positionOnMap.bottom][newPositionOnMap.left] ||
-                            movement.left > 0 && !this.map[positionOnMap.bottom][newPositionOnMap.right]
+                            movement.left < 0 && !this.level.map[positionOnMap.bottom][newPositionOnMap.left] ||
+                            movement.left > 0 && !this.level.map[positionOnMap.bottom][newPositionOnMap.right]
                         ) && (
-                            this.map[newPositionOnMap.bottom][newPositionOnMap.left] ||
-                            this.map[newPositionOnMap.bottom][newPositionOnMap.right]
+                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.left] ||
+                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.right]
                         )
                     )
                 )

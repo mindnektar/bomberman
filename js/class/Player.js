@@ -6,8 +6,14 @@
         this.level = level;
 
         this.skills = {
-            bombs: 1,
+            bombs: 3,
+            power: 1,
             speed: 4
+        };
+
+        this.score = {
+            wins: 0,
+            kills: 0
         };
 
         this._putOnMap();
@@ -93,94 +99,106 @@
     };
 
     Player.prototype._checkTileCollision = function(movement) {
-        var positionOnMap = this.getPositionOnMap(),
-            newPositionOnMap = this.getPositionOnMap(movement);
+        var pos = this.getPositionOnMap(),
+            newPos = this.getPositionOnMap(movement),
+            newMovement = $.extend({}, movement),
+            trav;
 
-        if (
-            movement.left < 0 &&
-            (
-                this.level.map[positionOnMap.top][newPositionOnMap.left] ||
-                this.level.map[positionOnMap.bottom][newPositionOnMap.left] ||
-                (
-                    movement.top &&
-                    (
-                        (
-                            movement.top < 0 && !this.level.map[newPositionOnMap.top][positionOnMap.left] ||
-                            movement.top > 0 && !this.level.map[newPositionOnMap.bottom][positionOnMap.left]
-                        ) && (
-                            this.level.map[newPositionOnMap.top][newPositionOnMap.left] ||
-                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.left]
-                        )
-                    )
-                )
-            )
-        ) {
-            movement.left = positionOnMap.left * 32 - (this.position.left + collision.left);
-        } else if (
-            movement.left > 0 &&
-            (
-                this.level.map[positionOnMap.top][newPositionOnMap.right] ||
-                this.level.map[positionOnMap.bottom][newPositionOnMap.right] ||
-                (
-                    movement.top &&
-                    (
-                        (
-                            movement.top < 0 && !this.level.map[newPositionOnMap.top][positionOnMap.right] ||
-                            movement.top > 0 && !this.level.map[newPositionOnMap.bottom][positionOnMap.right]
-                        ) && (
-                            this.level.map[newPositionOnMap.top][newPositionOnMap.right] ||
-                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.right]
-                        )
-                    )
-                )
-            )
-        ) {
-            movement.left = positionOnMap.right * 32 - (this.position.left + collision.left - 3);
+        if (movement.left < 0) {
+            trav = {
+                topLeft: this.level.isTraversable(newPos.left, pos.top),
+                bottomLeft: this.level.isTraversable(newPos.left, pos.bottom)
+            };
+
+            if (!trav.topLeft || !trav.bottomLeft) {
+                newMovement.left = pos.left * 32 - (this.position.left + collision.left);
+
+                if (newMovement.left + this.skills.speed < 0) {
+                    newMovement.left = -this.skills.speed;
+                }
+
+                if (!movement.top && newMovement.left > -this.skills.speed) {
+                    if (!trav.topLeft && trav.bottomLeft) {
+                        newMovement.top = newMovement.left + this.skills.speed;
+                    }
+
+                    if (trav.topLeft && !trav.bottomLeft) {
+                        newMovement.top = -(newMovement.left + this.skills.speed);
+                    }
+                }
+            }
+        } else if (movement.left > 0) {
+            trav = {
+                topRight: this.level.isTraversable(newPos.right, pos.top),
+                bottomRight: this.level.isTraversable(newPos.right, pos.bottom)
+            };
+
+            if (!trav.topRight || !trav.bottomRight) {
+                newMovement.left = pos.right * 32 - (this.position.left + collision.left - 3);
+
+                if (newMovement.left - this.skills.speed > 0) {
+                    newMovement.left = this.skills.speed;
+                }
+
+                if (!movement.top && newMovement.left < this.skills.speed) {
+                    if (!trav.topRight && trav.bottomRight) {
+                        newMovement.top = newMovement.left + this.skills.speed;
+                    }
+
+                    if (trav.topRight && !trav.bottomRight) {
+                        newMovement.top = -(newMovement.left + this.skills.speed);
+                    }
+                }
+            }
+        } else if (movement.top < 0) {
+            trav = {
+                topLeft: this.level.isTraversable(pos.left, newPos.top),
+                topRight: this.level.isTraversable(pos.right, newPos.top)
+            };
+
+            if (!trav.topLeft || !trav.topRight) {
+                newMovement.top = pos.top * 32 - (this.position.top + collision.top);
+
+                if (newMovement.top + this.skills.speed < 0) {
+                    newMovement.top = -this.skills.speed;
+                }
+
+                if (!movement.left && newMovement.top > -this.skills.speed) {
+                    if (!trav.topLeft && trav.topRight) {
+                        newMovement.left = newMovement.top + this.skills.speed;
+                    }
+
+                    if (trav.topLeft && !trav.topRight) {
+                        newMovement.left = -(newMovement.top + this.skills.speed);
+                    }
+                }
+            }
+        } else if (movement.top > 0) {
+            trav = {
+                bottomLeft: this.level.isTraversable(pos.left, newPos.bottom),
+                bottomRight: this.level.isTraversable(pos.right, newPos.bottom)
+            };
+
+            if (!trav.bottomLeft || !trav.bottomRight) {
+                newMovement.top = pos.bottom * 32 - (this.position.top + collision.top - 3);
+
+                if (newMovement.top - this.skills.speed > 0) {
+                    newMovement.top = this.skills.speed;
+                }
+
+                if (!movement.left && newMovement.top < this.skills.speed) {
+                    if (!trav.bottomLeft && trav.bottomRight) {
+                        newMovement.left = newMovement.top + this.skills.speed;
+                    }
+
+                    if (trav.bottomLeft && !trav.bottomRight) {
+                        newMovement.left = -(newMovement.top + this.skills.speed);
+                    }
+                }
+            }
         }
 
-        if (
-            movement.top < 0 &&
-            (
-                this.level.map[newPositionOnMap.top][positionOnMap.left] ||
-                this.level.map[newPositionOnMap.top][positionOnMap.right] ||
-                (
-                    movement.left &&
-                    (
-                        (
-                            movement.left < 0 && !this.level.map[positionOnMap.top][newPositionOnMap.left] ||
-                            movement.left > 0 && !this.level.map[positionOnMap.top][newPositionOnMap.right]
-                        ) && (
-                            this.level.map[newPositionOnMap.top][newPositionOnMap.left] ||
-                            this.level.map[newPositionOnMap.top][newPositionOnMap.right]
-                        )
-                    )
-                )
-            )
-        ) {
-            movement.top = positionOnMap.top * 32 - (this.position.top + collision.top);
-        } else if (
-            movement.top > 0 &&
-            (
-                this.level.map[newPositionOnMap.bottom][positionOnMap.left] ||
-                this.level.map[newPositionOnMap.bottom][positionOnMap.right] ||
-                (
-                    movement.left &&
-                    (
-                        (
-                            movement.left < 0 && !this.level.map[positionOnMap.bottom][newPositionOnMap.left] ||
-                            movement.left > 0 && !this.level.map[positionOnMap.bottom][newPositionOnMap.right]
-                        ) && (
-                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.left] ||
-                            this.level.map[newPositionOnMap.bottom][newPositionOnMap.right]
-                        )
-                    )
-                )
-            )
-        ) {
-            movement.top = positionOnMap.bottom * 32 - (this.position.top + collision.top - 3);
-        }
-
-        return movement;
+        return newMovement;
     };
 
     var collision = {

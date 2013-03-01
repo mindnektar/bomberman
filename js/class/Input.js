@@ -11,12 +11,26 @@
                     return;
                 }
 
+                if (moveMap[e.which] && $.inArray(e.which, direction) === -1) {
+                    direction.unshift(e.which);
+                    return;
+                }
+
                 if (!pressed[e.which]) {
                     pressed[e.which] = true;
                 }
             })
             .keyup(function(e) {
+                var directionIndex;
+
                 if (!e.which in Key) {
+                    return;
+                }
+
+                directionIndex = $.inArray(e.which, direction);
+
+                if (moveMap[e.which] && directionIndex !== -1) {
+                    direction.splice(directionIndex, 1);
                     return;
                 }
 
@@ -29,12 +43,10 @@
     Input.prototype.getMovement = function(speed) {
         var movement = {left: 0, top: 0};
 
-        $.each(pressed, function(key) {
-            if (moveMap[key]) {
-                movement.left = movement.left || moveMap[key][0] * speed;
-                movement.top = movement.top || moveMap[key][1] * speed;
-            }
-        });
+        if (moveMap[direction[0]]) {
+            movement.left = moveMap[direction[0]][0] * speed;
+            movement.top = moveMap[direction[0]][1] * speed;
+        }
 
         return movement;
     };
@@ -52,6 +64,7 @@
         },
 
         moveMap = {},
-        pressed = {};
+        pressed = {},
+        direction = [];
 
 })(jQuery);

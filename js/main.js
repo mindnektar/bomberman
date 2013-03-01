@@ -1,8 +1,6 @@
 $(function() {
     var me = location.href.split('?')[1],
 
-        speed = 4,
-
         ws,
         level,
         input,
@@ -27,7 +25,7 @@ $(function() {
     })();
 
     function frame() {
-        var movement = input.getMovement(speed),
+        var movement = input.getMovement(players[me].skills.speed),
             newPosition = players[me].move(movement);
 
         ws.emit('position', {position: newPosition});

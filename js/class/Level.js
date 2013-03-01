@@ -2,18 +2,18 @@
     Level = function($level) {
         this.$level = $level || $('#level');
 
-        this.level = null;
+        this.map = null;
     };
 
-    Level.prototype.build = function(level) {
+    Level.prototype.build = function(name) {
         var html = '',
             i, j;
 
-        this.level = level;
+        this.map = maps[name];
 
-        for (i in levels[level]) {
-            for (j in levels[level][i]) {
-                html += '<div class="tile ' + tiles[levels[level][i][j]] + '"></div>';
+        for (i in this.map) {
+            for (j in this.map[i]) {
+                html += '<div class="tile ' + tiles[this.map[i][j]] + '"></div>';
             }
         }
 
@@ -22,8 +22,8 @@
 
     Level.prototype.getBounds = function() {
         return {
-            left: levels[this.level][0].length * 32,
-            top: levels[this.level].length * 32
+            left: this.map[0].length * 32,
+            top: this.map.length * 32
         }
     };
 
@@ -33,7 +33,7 @@
             2: 'fixed'
         },
 
-        levels = {
+        maps = {
             empty: [
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -57,7 +57,7 @@
                 [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

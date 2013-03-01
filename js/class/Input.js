@@ -11,17 +11,21 @@
                     return;
                 }
 
-                if (!pressed[e.which]) {
-                    pressed[e.which] = true;
+                if ($.inArray(e.which, direction) === -1) {
+                    direction.unshift(e.which);
                 }
             })
             .keyup(function(e) {
+                var directionIndex;
+
                 if (!moveMap[e.which]) {
                     return;
                 }
 
-                if (pressed[e.which]) {
-                    delete pressed[e.which];
+                directionIndex = $.inArray(e.which, direction);
+
+                if (directionIndex !== -1) {
+                    direction.splice(directionIndex, 1);
                 }
             });
     };
@@ -29,12 +33,10 @@
     Input.prototype.getMovement = function(speed) {
         var movement = {left: 0, top: 0};
 
-        $.each(pressed, function(key) {
-            if (moveMap[key]) {
-                movement.left = moveMap[key][0] * speed;
-                movement.top = moveMap[key][1] * speed;
-            }
-        });
+        if (moveMap[direction[0]]) {
+            movement.left = moveMap[direction[0]][0] * speed;
+            movement.top = moveMap[direction[0]][1] * speed;
+        }
 
         return movement;
     };
@@ -47,6 +49,6 @@
         },
 
         moveMap = {},
-        pressed = {};
+        direction = [];
 
 })(jQuery);

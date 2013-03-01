@@ -1,11 +1,15 @@
 (function($) {
     Level = function($level) {
         this.$level = $level || $('#level');
+
+        this.level = null;
     };
 
     Level.prototype.build = function(level) {
         var html = '',
             i, j;
+
+        this.level = level;
 
         for (i in levels[level]) {
             for (j in levels[level][i]) {
@@ -14,6 +18,13 @@
         }
 
         this.$level.append(html);
+    };
+
+    Level.prototype.getBounds = function() {
+        return {
+            left: levels[this.level][0].length * 32,
+            top: levels[this.level].length * 32
+        }
     };
 
     var tiles = {

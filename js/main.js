@@ -9,17 +9,20 @@ $(function() {
         players = {};
 
     (function init() {
+        var bounds;
+
         ws = $.socketio(me, {
             position: position
         });
 
         level = new Level();
         level.build('empty');
+        bounds = level.getBounds();
 
         input = new Input();
 
-        players.blue = new Player('blue', {left: 128, top: 128});
-        players.red = new Player('red', {left: 256, top: 256});
+        players.blue = new Player('blue', {left: 128, top: 128}, bounds);
+        players.red = new Player('red', {left: 256, top: 256}, bounds);
 
         setInterval(frame, 40);
     })();

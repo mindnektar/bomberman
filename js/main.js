@@ -6,7 +6,7 @@ $(function() {
             red: $('#red')
         },
 
-        pressed = {blue: {}, red: {}},
+        pressed = {},
         ws,
         moveMap = {},
 
@@ -17,10 +17,23 @@ $(function() {
             LEFT: 65
         },
 
+        pos = {
+            blue: {
+                left: 128,
+                top: 128
+            },
+            red: {
+                left: 800,
+                top: 640
+            }
+        },
+
         speed = 4;
 
     (function init() {
-        ws = $.socketio(me, input);
+        ws = $.socketio(me, {
+            position: position
+        });
 
         moveMap[Key.UP] = [0, -1];
         moveMap[Key.RIGHT] = [1, 0];
@@ -33,8 +46,8 @@ $(function() {
                     return;
                 }
 
-                if (!pressed[me][e.which]) {
-                    pressed[me][e.which] = true;
+                if (!pressed[e.which]) {
+                    pressed[e.which] = true;
                 }
             })
             .keyup(function(e) {
@@ -42,8 +55,8 @@ $(function() {
                     return;
                 }
 
-                if (pressed[me][e.which]) {
-                    delete pressed[me][e.which];
+                if (pressed[e.which]) {
+                    delete pressed[e.which];
                 }
             });
 
@@ -51,34 +64,34 @@ $(function() {
     })();
 
     function frame() {
-        emit();
+        var movement = {left: 0, top: 0};
 
-        $.each(pressed, function(player, keys) {
-            var movement = {x: 0, y: 0};
-
-            $.each(keys, function(key) {console.log(key);
-                if (moveMap[key]) {
-                    movement.x = moveMap[key][0] * speed;
-                    movement.y = moveMap[key][1] * speed;
-                }
-            });
-
-            players[player].css({
-                left: '+=' + movement.x,
-                top: '+=' + movement.y
-            });
+        $.each(pressed, function(key) {
+            if (moveMap[key]) {
+                movement.left = moveMap[key][0] * speed;
+                movement.top = moveMap[key][1] * speed;
+            }
         });
+
+        pos[me].left += movement.left;
+        pos[me].top += movement.top;
+
+        moveOnMap(me);
+
+        ws.emit('position', {position: pos[me]});
     }
 
-    function input(data) {
+    function position(data) {
         if (data.who === me) {
             return;
         }
 
-        pressed[data.who] = data.keys;
+        pos[data.who] = data.position;
+
+        moveOnMap(data.who);
     }
 
-    function emit() {
-        ws.emit({who: me, keys: pressed[me]});
+    function moveOnMap(player) {
+        players[player].css(pos[player]);
     }
 });

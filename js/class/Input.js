@@ -7,25 +7,21 @@
 
         $(window)
             .keydown(function(e) {
-                if (!moveMap[e.which]) {
+                if (!e.which in Key) {
                     return;
                 }
 
-                if ($.inArray(e.which, direction) === -1) {
-                    direction.unshift(e.which);
+                if (!pressed[e.which]) {
+                    pressed[e.which] = true;
                 }
             })
             .keyup(function(e) {
-                var directionIndex;
-
-                if (!moveMap[e.which]) {
+                if (!e.which in Key) {
                     return;
                 }
 
-                directionIndex = $.inArray(e.which, direction);
-
-                if (directionIndex !== -1) {
-                    direction.splice(directionIndex, 1);
+                if (pressed[e.which]) {
+                    delete pressed[e.which];
                 }
             });
     };
@@ -33,22 +29,29 @@
     Input.prototype.getMovement = function(speed) {
         var movement = {left: 0, top: 0};
 
-        if (moveMap[direction[0]]) {
-            movement.left = moveMap[direction[0]][0] * speed;
-            movement.top = moveMap[direction[0]][1] * speed;
-        }
+        $.each(pressed, function(key) {
+            if (moveMap[key]) {
+                movement.left = movement.left || moveMap[key][0] * speed;
+                movement.top = movement.top || moveMap[key][1] * speed;
+            }
+        });
 
         return movement;
+    };
+
+    Input.prototype.bombDropped = function() {
+        return pressed[Key.BOMB];
     };
 
     var Key = {
             UP: 87,
             RIGHT: 68,
             DOWN: 83,
-            LEFT: 65
+            LEFT: 65,
+            BOMB: 79
         },
 
         moveMap = {},
-        direction = [];
+        pressed = {};
 
 })(jQuery);

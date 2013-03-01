@@ -27,7 +27,33 @@
         }
     };
 
-    var tiles = {
+    Level.prototype.isBombOn = function(positionOnMap) {
+        return bombs[positionOnMap.left] && bombs[positionOnMap.left][positionOnMap.top];
+    };
+
+    Level.prototype.dropBomb = function(who, positionOnMap, onDetonate) {
+        if (!bombs[positionOnMap.left]) {
+            bombs[positionOnMap.left] = {};
+        }
+
+        bombs[positionOnMap.left][positionOnMap.top] = new Bomb(
+            who,
+            {
+                left: positionOnMap.left * 32,
+                top: positionOnMap.top * 32
+            },
+            this,
+            function() {
+                bombs[positionOnMap.left][positionOnMap.top] = null;
+
+                onDetonate && onDetonate();
+            }
+        );
+    };
+
+    var bombs = {},
+
+        tiles = {
             0: 'empty',
             1: 'breakable',
             2: 'fixed'

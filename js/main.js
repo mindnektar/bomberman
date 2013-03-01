@@ -7,10 +7,9 @@ $(function() {
         players = {};
 
     (function init() {
-        var bounds;
-
         ws = $.socketio(me, {
-            position: position
+            position: position,
+            dropBomb: dropBomb
         });
 
         level = new Level();
@@ -26,7 +25,19 @@ $(function() {
 
     function frame() {
         var movement = input.getMovement(players[me].skills.speed),
-            newPosition = players[me].move(movement);
+            newPosition = players[me].move(movement),
+            centerPositionOnMap = players[me].getCenterPositionOnMap();
+
+        if (input.bombDropped() && !level.isBombOn(centerPositionOnMap) && players[me].skills.bombs) {
+
+            players[me].skills.bombs--;
+
+            level.dropBomb(me, centerPositionOnMap, function() {
+                players[me].skills.bombs++;
+            });
+
+            ws.emit('dropBomb', centerPositionOnMap);
+        }
 
         ws.emit('position', {position: newPosition});
     }
@@ -37,5 +48,17 @@ $(function() {
         }
 
         players[data.who].setPosition(data.position);
+    }
+
+    function dropBomb(data) {
+        if (data.who === me) {
+            return;
+        }
+
+        level.dropBomb(data.who, players[data.who].position);
+    }
+
+    function bombDetonated() {
+
     }
 });

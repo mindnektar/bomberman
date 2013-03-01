@@ -24,6 +24,31 @@
         return this.position;
     };
 
+    Player.prototype.getPositionOnMap = function(modifier) {
+        if (!modifier) {
+            modifier = {
+                left: 0,
+                top: 0
+            };
+        }
+
+        return {
+            left: Math.floor((this.position.left + collision.left + modifier.left) / 32),
+            right: Math.floor((this.position.left + collision.left + collision.width + modifier.left) / 32),
+            top: Math.floor((this.position.top + collision.top + modifier.top) / 32),
+            bottom: Math.floor((this.position.top + collision.top + collision.height + modifier.top) / 32)
+        };
+    };
+
+    Player.prototype.getCenterPositionOnMap = function() {
+        var modifier = {
+            left: collision.width / 2,
+            top: collision.top / 2
+        };
+
+        return this.getPositionOnMap(modifier);
+    };
+
     Player.prototype.move = function(movement) {
         movement = this._checkBoundsCollision(movement);
         movement = this._checkTileCollision(movement);
@@ -67,22 +92,8 @@
     };
 
     Player.prototype._checkTileCollision = function(movement) {
-        var newLeft = this.position.left + movement.left,
-            newTop = this.position.top + movement.top,
-
-            positionOnMap = {
-                left: Math.floor((this.position.left + collision.left) / 32),
-                right: Math.floor((this.position.left + collision.left + collision.width) / 32),
-                top: Math.floor((this.position.top + collision.top) / 32),
-                bottom: Math.floor((this.position.top + collision.top + collision.height) / 32)
-            },
-
-            newPositionOnMap = {
-                left: Math.floor((newLeft + collision.left) / 32),
-                right: Math.floor((newLeft + collision.left + collision.width) / 32),
-                top: Math.floor((newTop + collision.top) / 32),
-                bottom: Math.floor((newTop + collision.top + collision.height) / 32)
-            };
+        var positionOnMap = this.getPositionOnMap(),
+            newPositionOnMap = this.getPositionOnMap(movement);
 
         if (
             movement.left < 0 &&

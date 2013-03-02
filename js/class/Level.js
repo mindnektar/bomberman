@@ -64,22 +64,22 @@
 
                 html += '<div class="detonation ' + who + '" style="left: ' + (positionOnMap.left * 32) + 'px; top: ' + (positionOnMap.top * 32) + 'px;"></div>';
 
-                for (i = 1; i <= power && !self.map[positionOnMap.top][positionOnMap.left - i]; i++) {
+                for (i = 1; i <= power && !self.map[positionOnMap.top][positionOnMap.left - i] && positionOnMap.left - i >= 0; i++) {
                     detonations[positionOnMap.left - i][positionOnMap.top] = who;
                     html += '<div class="detonation ' + who + '" style="left: ' + ((positionOnMap.left - i) * 32) + 'px; top: ' + (positionOnMap.top * 32) + 'px;"></div>';
                 }
 
-                for (i = 1; i <= power && !self.map[positionOnMap.top][positionOnMap.left + i]; i++) {
+                for (i = 1; i <= power && !self.map[positionOnMap.top][positionOnMap.left + i] && positionOnMap.left + i < self.map[0].length; i++) {
                     detonations[positionOnMap.left + i][positionOnMap.top] = who;
                     html += '<div class="detonation ' + who + '" style="left: ' + ((positionOnMap.left + i) * 32) + 'px; top: ' + (positionOnMap.top * 32) + 'px;"></div>';
                 }
 
-                for (i = 1; i <= power && !self.map[positionOnMap.top - i][positionOnMap.left]; i++) {
+                for (i = 1; i <= power && !self.map[positionOnMap.top - i][positionOnMap.left] && positionOnMap.top - i >= 0; i++) {
                     detonations[positionOnMap.left][positionOnMap.top - i] = who;
                     html += '<div class="detonation ' + who + '" style="left: ' + (positionOnMap.left * 32) + 'px; top: ' + ((positionOnMap.top - i) * 32) + 'px;"></div>';
                 }
 
-                for (i = 1; i <= power && !self.map[positionOnMap.top + i][positionOnMap.left]; i++) {
+                for (i = 1; i <= power && !self.map[positionOnMap.top + i][positionOnMap.left] && positionOnMap.top + i < self.map.length; i++) {
                     detonations[positionOnMap.left][positionOnMap.top + i] = who;
                     html += '<div class="detonation ' + who + '" style="left: ' + (positionOnMap.left * 32) + 'px; top: ' + ((positionOnMap.top + i) * 32) + 'px;"></div>';
                 }

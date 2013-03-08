@@ -106,6 +106,10 @@
                 detonations = self._dataObject();
             }
         );
+
+        if (detonations[positionOnMap.left][positionOnMap.top]) {
+            bombs[positionOnMap.left][positionOnMap.top].detonate();
+        }
     };
 
     Level.prototype.dropItem = function(type, left, top) {
@@ -200,6 +204,7 @@
 
         if (bombs[left][top]) {
             bombs[left][top].detonate();
+            return null;
         }
 
         detonations[left][top] = {type: type, bomb: bomb};

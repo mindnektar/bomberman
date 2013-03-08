@@ -5,10 +5,16 @@
         this.level = level;
         this.onDeath = onDeath;
 
+        this.facing = {
+            left: 0,
+            top: 1
+        };
+
         this.skills = {
-            bombs: 1,
-            power: 1,
-            speed: 4
+            bombs: 20,
+            power: 8,
+            speed: 4,
+            line: true
         };
 
         this.score = {
@@ -59,6 +65,13 @@
             return this.position;
         }
 
+        if (movement.left || movement.top) {
+            this.facing = {
+                left: movement.left ? movement.left / Math.abs(movement.left) : 0,
+                top: movement.top ? movement.top / Math.abs(movement.top) : 0
+            };
+        }
+
         this._checkDetonationCollision(movement);
         this._checkItemCollision(movement);
         movement = this._checkTileCollision(movement);
@@ -69,6 +82,55 @@
         this._putOnMap();
 
         return this.position;
+    };
+
+    Player.prototype.dropBomb = function() {
+        var self = this,
+            centerPositionOnMap = this.getCenterPositionOnMap();
+
+        if (this.level.isBombOn(centerPositionOnMap.left, centerPositionOnMap.top) || !this.skills.bombs) {
+            return;
+        }
+
+        this.level.dropBomb(me, this.skills.power, centerPositionOnMap, function() {
+            self.skills.bombs++;
+        });
+
+        this.skills.bombs--;
+
+        ws.emit('dropBomb', {position: centerPositionOnMap});
+    };
+
+    Player.prototype.dropLine = function() {
+        var self = this,
+            centerPositionOnMap = this.getCenterPositionOnMap(),
+            i,
+            end,
+            left,
+            top;
+
+        end = this.skills.bombs;
+
+        for (i = 1; i <= end; i++) {
+            left = centerPositionOnMap.left + i * this.facing.left;
+            top = centerPositionOnMap.top + i * this.facing.top;
+
+            if (!this.skills.bombs) {
+                break;
+            }
+
+            if (!this.level.isTraversable(left, top)) {
+                break;
+            }
+
+            this.level.dropBomb(me, this.skills.power, {left: left, top: top}, function() {
+                self.skills.bombs++;
+            });
+
+            this.skills.bombs--;
+
+            ws.emit('dropBomb', {position: {left: left, top: top}});
+        }
     };
 
     Player.prototype.die = function() {

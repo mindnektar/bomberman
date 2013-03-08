@@ -41,26 +41,21 @@ $(function() {
     })();
 
     function frame() {
-        var movement = input.getMovement(players[me].skills.speed),
-            newPosition = players[me].move(movement),
-            centerPositionOnMap = players[me].getCenterPositionOnMap();
+        var movement = input.getMovement(players[me].skills.speed);
+
+        ws.emit('position', {position: players[me].move(movement)});
 
         if (players[me].dead) {
             return;
         }
 
-        if (input.bombDropped() && !level.isBombOn(centerPositionOnMap.left, centerPositionOnMap.top) && players[me].skills.bombs) {
-
-            players[me].skills.bombs--;
-
-            level.dropBomb(me, players[me].skills.power, centerPositionOnMap, function() {
-                players[me].skills.bombs++;
-            });
-
-            ws.emit('dropBomb', {position: centerPositionOnMap});
+        if (input.bombDropped()) {
+            if (input.secondPress) {
+                players[me].dropLine();
+            } else {
+                players[me].dropBomb();
+            }
         }
-
-        ws.emit('position', {position: newPosition});
     }
 
     function position(data) {

@@ -200,6 +200,7 @@
 
         if (bombs[left][top]) {
             bombs[left][top].detonate();
+            return null;
         }
 
         detonations[left][top] = {type: type, bomb: bomb};

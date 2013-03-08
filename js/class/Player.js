@@ -196,9 +196,9 @@
                 bottomLeft: this.level.isDetonationOn(newPos.left, newPos.bottom)
             };
 
-        $.each(detonations, function(_, who) {
-            if (who) {
-                self._kill(who);
+        $.each(detonations, function(_, bomb) {
+            if (bomb) {
+                self._kill(bomb.who);
                 return false;
             }
         });

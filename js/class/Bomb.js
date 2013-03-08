@@ -2,14 +2,16 @@
     Bomb = function(who, power, position, level, onDetonation, onDetonationEnd) {
         var self = this;
 
-        this.$bomb = $('<div class="bomb ' + who + '"></div>');
-        this.$bomb
-            .css(position)
-            .appendTo(level.$level);
-
+        this.who = who;
+        this.position = position;
         this.power = power;
         this.onDetonation = onDetonation;
         this.onDetonationEnd = onDetonationEnd;
+
+        this.$bomb = $('<div class="bomb ' + this.who + '"></div>');
+        this.$bomb
+            .css(position)
+            .appendTo(level.$level);
 
         this.timer = setTimeout(function() {
             self.detonate();
@@ -23,7 +25,7 @@
 
         this.$bomb.remove();
 
-        this.onDetonation && this.onDetonation();
+        this.onDetonation && this.onDetonation(this);
 
         this.timer = setTimeout(function() {
             self.remove();
@@ -33,6 +35,12 @@
     Bomb.prototype.remove = function() {
         clearTimeout(this.timer);
 
-        this.onDetonationEnd && this.onDetonationEnd();
+        this.$detonations.remove();
+
+        this.onDetonationEnd && this.onDetonationEnd(this);
+    };
+
+    Bomb.prototype.setDetonations = function($detonations) {
+        this.$detonations = $detonations;
     };
 })(jQuery);

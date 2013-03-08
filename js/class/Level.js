@@ -34,7 +34,7 @@
         for (i in this.map) {
             for (j in this.map[i]) {
                 if (!this.map[i][j]) {
-                    this.map[i][j] = 1;
+                    //this.map[i][j] = 1;
 
                     for (k in startPositions) {
                         if ((Math.abs(startPositions[k].left - j) <= 1 && startPositions[k].top == i) ||
@@ -60,11 +60,19 @@
     };
 
     Level.prototype.isBombOn = function(left, top) {
-        return bombs[left] && bombs[left][top];
+        if (!bombs[left]) {
+            return null;
+        }
+
+        return bombs[left][top];
     };
 
     Level.prototype.isDetonationOn = function(left, top) {
-        return detonations[left] && detonations[left][top];
+        if (!detonations[left]) {
+            return null;
+        }
+
+        return detonations[left][top];
     };
 
     Level.prototype.dropBomb = function(who, power, positionOnMap, onDetonation) {
@@ -78,20 +86,14 @@
                 top: positionOnMap.top * 32
             },
             this,
-            function() {
+            function(bomb) {
                 bombs[positionOnMap.left][positionOnMap.top] = null;
 
-                self._placeDetonations(positionOnMap, who, power);
-
-                if (self.handledAllDetonations) {
-                    self._breakBlocks();
-                }
+                self._placeDetonations(positionOnMap, bomb);
 
                 onDetonation && onDetonation();
             },
             function() {
-
-
                 self._removeDetonations();
             }
         );
@@ -99,20 +101,17 @@
 
     /* Private */
 
-    Level.prototype._placeDetonations = function(positionOnMap, who, power) {
+    Level.prototype._placeDetonations = function(positionOnMap, bomb) {
         var html = '',
             detonation,
-            i,
-            left,
-            top,
-            topEnd;
+            i;
 
-        detonations[positionOnMap.left][positionOnMap.top] = who;
+        detonations[positionOnMap.left][positionOnMap.top] = bomb;
 
-        html += '<div class="detonation ' + who + '" style="left: ' + (positionOnMap.left * 32) + 'px; top: ' + (positionOnMap.top * 32) + 'px;"></div>';
+        html += '<div class="detonation ' + bomb.who + '" style="left: ' + (positionOnMap.left * 32) + 'px; top: ' + (positionOnMap.top * 32) + 'px;"></div>';
 
-        for (i = 1; i <= power && positionOnMap.left - i >= 0 && this.map[positionOnMap.top][positionOnMap.left - i] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left - i, positionOnMap.top, who);
+        for (i = 1; i <= bomb.power && positionOnMap.left - i >= 0 && this.map[positionOnMap.top][positionOnMap.left - i] !== 2; i++) {
+            detonation = this._handleDetonation(positionOnMap.left - i, positionOnMap.top, bomb);
 
             if (!detonation) {
                 break;
@@ -121,8 +120,8 @@
             html += detonation;
         }
 
-        for (i = 1; i <= power && positionOnMap.left + i < this.map[0].length && this.map[positionOnMap.top][positionOnMap.left + i] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left + i, positionOnMap.top, who);
+        for (i = 1; i <= bomb.power && positionOnMap.left + i < this.map[0].length && this.map[positionOnMap.top][positionOnMap.left + i] !== 2; i++) {
+            detonation = this._handleDetonation(positionOnMap.left + i, positionOnMap.top, bomb);
 
             if (!detonation) {
                 break;
@@ -131,8 +130,8 @@
             html += detonation;
         }
 
-        for (i = 1; i <= power && positionOnMap.top - i >= 0 && this.map[positionOnMap.top - i][positionOnMap.left] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top - i, who);
+        for (i = 1; i <= bomb.power && positionOnMap.top - i >= 0 && this.map[positionOnMap.top - i][positionOnMap.left] !== 2; i++) {
+            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top - i, bomb);
 
             if (!detonation) {
                 break;
@@ -141,8 +140,8 @@
             html += detonation;
         }
 
-        for (i = 1; i <= power && positionOnMap.top + i < this.map.length && this.map[positionOnMap.top + i][positionOnMap.left] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top + i, who);
+        for (i = 1; i <= bomb.power && positionOnMap.top + i < this.map.length && this.map[positionOnMap.top + i][positionOnMap.left] !== 2; i++) {
+            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top + i, bomb);
 
             if (!detonation) {
                 break;
@@ -151,11 +150,13 @@
             html += detonation;
         }
 
-        this.$level.append(html);
+        bomb.setDetonations(
+            $(html).appendTo(this.$level)
+        );
     };
 
-    Level.prototype._handleDetonation = function(left, top, who) {
-        if (this._breakBlock(left, top) || this.isDetonationOn(left, top)) {
+    Level.prototype._handleDetonation = function(left, top, bomb) {
+        if (this._breakBlock(left, top)) {
             return null;
         }
 
@@ -163,14 +164,12 @@
             bombs[left][top].detonate();
         }
 
-        detonations[left][top] = who;
-        return '<div class="detonation ' + who + '" style="left: ' + (left * 32) + 'px; top: ' + (top * 32) + 'px;"></div>';
+        detonations[left][top] = bomb;
+        return '<div class="detonation ' + bomb.who + '" style="left: ' + (left * 32) + 'px; top: ' + (top * 32) + 'px;"></div>';
     };
 
     Level.prototype._removeDetonations = function() {
         detonations = this._dataObject();
-
-        $('.detonation', this.$level).remove();
     };
 
     Level.prototype._breakBlock = function(left, top) {

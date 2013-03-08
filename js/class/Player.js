@@ -6,7 +6,7 @@
         this.onDeath = onDeath;
 
         this.skills = {
-            bombs: 3,
+            bombs: 5,
             power: 19,
             speed: 4
         };

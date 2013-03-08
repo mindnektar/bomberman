@@ -34,7 +34,7 @@
         for (i in this.map) {
             for (j in this.map[i]) {
                 if (!this.map[i][j]) {
-                    //this.map[i][j] = 1;
+                    this.map[i][j] = 1;
 
                     for (k in startPositions) {
                         if ((Math.abs(startPositions[k].left - j) <= 1 && startPositions[k].top == i) ||
@@ -51,6 +51,7 @@
 
         bombs = this._dataObject();
         detonations = this._dataObject();
+        items = this._dataObject();
 
         this.$level.append(html);
     };
@@ -106,12 +107,12 @@
             detonation,
             i;
 
-        detonations[positionOnMap.left][positionOnMap.top] = bomb;
+        detonations[positionOnMap.left][positionOnMap.top] = {type: 'center', bomb: bomb};
 
-        html += '<div class="detonation ' + bomb.who + '" style="left: ' + (positionOnMap.left * 32) + 'px; top: ' + (positionOnMap.top * 32) + 'px;"></div>';
+        html += '<div class="detonation center ' + bomb.who + '" style="left: ' + (positionOnMap.left * 32) + 'px; top: ' + (positionOnMap.top * 32) + 'px;"></div>';
 
         for (i = 1; i <= bomb.power && positionOnMap.left - i >= 0 && this.map[positionOnMap.top][positionOnMap.left - i] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left - i, positionOnMap.top, bomb);
+            detonation = this._handleDetonation(positionOnMap.left - i, positionOnMap.top, 'horizontal', bomb);
 
             if (!detonation) {
                 break;
@@ -121,7 +122,7 @@
         }
 
         for (i = 1; i <= bomb.power && positionOnMap.left + i < this.map[0].length && this.map[positionOnMap.top][positionOnMap.left + i] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left + i, positionOnMap.top, bomb);
+            detonation = this._handleDetonation(positionOnMap.left + i, positionOnMap.top, 'horizontal', bomb);
 
             if (!detonation) {
                 break;
@@ -131,7 +132,7 @@
         }
 
         for (i = 1; i <= bomb.power && positionOnMap.top - i >= 0 && this.map[positionOnMap.top - i][positionOnMap.left] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top - i, bomb);
+            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top - i, 'vertical', bomb);
 
             if (!detonation) {
                 break;
@@ -141,7 +142,7 @@
         }
 
         for (i = 1; i <= bomb.power && positionOnMap.top + i < this.map.length && this.map[positionOnMap.top + i][positionOnMap.left] !== 2; i++) {
-            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top + i, bomb);
+            detonation = this._handleDetonation(positionOnMap.left, positionOnMap.top + i, 'vertical', bomb);
 
             if (!detonation) {
                 break;
@@ -155,8 +156,16 @@
         );
     };
 
-    Level.prototype._handleDetonation = function(left, top, bomb) {
+    Level.prototype._handleDetonation = function(left, top, type, bomb) {
+        var detonation;
+
         if (this._breakBlock(left, top)) {
+            return null;
+        }
+
+        detonation = this.isDetonationOn(left, top);
+
+        if (detonation && (detonation.type === type || detonation.type === 'center')) {
             return null;
         }
 
@@ -164,8 +173,8 @@
             bombs[left][top].detonate();
         }
 
-        detonations[left][top] = bomb;
-        return '<div class="detonation ' + bomb.who + '" style="left: ' + (left * 32) + 'px; top: ' + (top * 32) + 'px;"></div>';
+        detonations[left][top] = {type: type, bomb: bomb};
+        return '<div class="detonation ' + type + ' ' + bomb.who + '" style="left: ' + (left * 32) + 'px; top: ' + (top * 32) + 'px;"></div>';
     };
 
     Level.prototype._removeDetonations = function() {
@@ -199,6 +208,7 @@
 
     var bombs,
         detonations,
+        items,
 
         tiles = {
             0: 'empty',

@@ -4,7 +4,10 @@ $(function() {
         ws,
         level,
         input,
-        players = {};
+        players = {
+            blue: null,
+            red: null
+        };
 
     (function init() {
         ws = $.socketio(me, {
@@ -21,13 +24,15 @@ $(function() {
             }
         });
 
-        level = new Level();
-        level.build('blocktest');
-
         input = new Input();
 
-        players.blue = new Player('blue', {left: 64, top: 128}, level, onDeath);
-        players.red = new Player('red', {left: 256, top: 256}, level, onDeath);
+        level = new Level();
+
+        $.each(players, function(who, _) {
+            players[who] = new Player(who, level, onDeath);
+        });
+
+        level.build('empty', players);
 
         setInterval(frame, 40);
     })();

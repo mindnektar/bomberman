@@ -1,9 +1,7 @@
 #level {
     border: 4px solid #ebebeb;
     box-shadow: 0 0 5px 2px rgba(0,0,0,0.8);
-    height: 480px;
     position: relative;
-    width: 640px;
 }
 
 .tile {
@@ -14,8 +12,12 @@
     width: 32px;
 }
 
+.tile.breakable {
+    background: #78af51;
+}
+
 .tile.fixed {
-    background: #72a850;
+    background: #476b35;
 }
 
 .player {

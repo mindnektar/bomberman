@@ -1,14 +1,13 @@
 (function($) {
-    Player = function(player, position, level, onDeath) {
+    Player = function(player, level, onDeath) {
         this.$player = $('<div id="' + player + '" class="player"></div>');
 
-        this.position = position;
         this.level = level;
         this.onDeath = onDeath;
 
         this.skills = {
             bombs: 3,
-            power: 1,
+            power: 19,
             speed: 4
         };
 
@@ -18,10 +17,6 @@
         };
 
         this.dead = false;
-
-        this._putOnMap();
-
-        level.$level.append(this.$player);
     };
 
     Player.prototype.setPosition = function(position) {
@@ -63,7 +58,6 @@
         }
 
         this._checkDetonationCollision(movement);
-        movement = this._checkBoundsCollision(movement);
         movement = this._checkTileCollision(movement);
 
         this.position.left += movement.left;
@@ -88,28 +82,6 @@
         this.$player
             .css(this.position)
             .css({zIndex: zIndex});
-    };
-
-    Player.prototype._checkBoundsCollision = function(movement) {
-        var bounds = this.level.getBounds();
-
-        if (this.position.left + collision.left + movement.left < 0) {
-            movement.left = 0 - (this.position.left + collision.left);
-        }
-
-        if (this.position.left + collision.left + collision.width + movement.left > bounds.left) {
-            movement.left = bounds.left - (this.position.left + collision.left + collision.width);
-        }
-
-        if (this.position.top + collision.top + movement.top < 0) {
-            movement.top = 0 - (this.position.top + collision.top);
-        }
-
-        if (this.position.top + collision.top + collision.height + movement.top > bounds.top) {
-            movement.top = bounds.top - (this.position.top + collision.top + collision.height);
-        }
-
-        return movement;
     };
 
     Player.prototype._checkTileCollision = function(movement) {

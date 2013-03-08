@@ -35,6 +35,14 @@
     background: #f00;
 }
 
+#yellow {
+    background: #ff0;
+}
+
+#green {
+    background: #090;
+}
+
 .bomb {
     border-radius: 16px;
     box-shadow: -2px -2px 5px rgba(0,0,0,0.5) inset, 2px 2px 5px rgba(255,255,255,0.5) inset;
@@ -51,6 +59,14 @@
     background: #f00;
 }
 
+.bomb.yellow {
+    background: #ff0;
+}
+
+.bomb.green {
+    background: #090;
+}
+
 .detonation {
     box-shadow: -2px -2px 5px rgba(0,0,0,0.5) inset, 2px 2px 5px rgba(255,255,255,0.5) inset;
     height: 32px;
@@ -65,6 +81,14 @@
 
 .detonation.red {
     background: #f00;
+}
+
+.detonation.yellow {
+    background: #ff0;
+}
+
+.detonation.green {
+    background: #090;
 }
 
 .item {

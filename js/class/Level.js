@@ -264,7 +264,9 @@
 
         startPositions = [
             {left: 0, top: 0},
-            {left: 18, top: 14}
+            {left: 18, top: 14},
+            {left: 18, top: 0},
+            {left: 0, top: 14}
         ],
 
         maps = {

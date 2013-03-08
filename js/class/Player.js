@@ -116,6 +116,7 @@
         $.each(items, function(_, item) {
             if (item) {
                 item.collect(self);
+                ws.emit('collectItem', {left: item.left, top: item.top});
                 return false;
             }
         });

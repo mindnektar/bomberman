@@ -90,7 +90,7 @@ $(function() {
             return;
         }
 
-        level.removeItem(data.left, data.top);
+        level.collectItem(players[data.who], data.left, data.top);
     }
 
     function onDeath(who) {

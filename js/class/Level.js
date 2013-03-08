@@ -111,16 +111,15 @@
     Level.prototype.dropItem = function(type, left, top) {
         var self = this;
 
-        items[left][top] = new Item(type, left, top, this,
-            function() {
-                self.removeItem(left, top);
-            }
-        );
+        items[left][top] = new Item(type, left, top, this, function() {
+            items[left][top].remove();
+            items[left][top] = null;
+        });
     };
 
-    Level.prototype.removeItem = function(left, top) {
+    Level.prototype.collectItem = function(player, left, top) {
         if (items[left][top]) {
-            items[left][top].remove();
+            items[left][top].collect(player);
             items[left][top] = null;
         }
     };
@@ -188,8 +187,9 @@
             return null;
         }
 
-        if (this.isItemOn(left, top)) {
-            this.removeItem(left, top);
+        if (items[left][top]) {
+            items[left][top].remove();
+            items[left][top] = null;
             return null;
         }
 

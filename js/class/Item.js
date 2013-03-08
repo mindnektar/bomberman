@@ -17,16 +17,16 @@
 
     Item.prototype.collect = function(player) {
         switch (this.type) {
-            case 'bomb':
+            case 'bombs':
             case 'power':
             case 'speed':
                 player.skills[this.type]++;
                 break;
         }
 
-        this.onCollect && this.onCollect();
+        this.remove();
 
-        ws.emit('collectItem', {left: this.left, top: this.top});
+        this.onCollect && this.onCollect();
     };
 
     Item.prototype.remove = function() {

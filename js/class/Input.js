@@ -1,4 +1,4 @@
-(function($) {
+(function($, undefined) {
     Input = function() {
         moveMap[Key.UP] = [0, -1];
         moveMap[Key.RIGHT] = [1, 0];
@@ -16,7 +16,7 @@
                     return;
                 }
 
-                if (!pressed[e.which]) {
+                if (pressed[e.which] === undefined) {
                     pressed[e.which] = true;
                 }
             })
@@ -34,7 +34,7 @@
                     return;
                 }
 
-                if (pressed[e.which]) {
+                if (pressed[e.which] !== undefined) {
                     delete pressed[e.which];
                 }
             });
@@ -52,7 +52,13 @@
     };
 
     Input.prototype.bombDropped = function() {
-        return pressed[Key.BOMB];
+        if (pressed[Key.BOMB]) {
+            pressed[Key.BOMB] = false;
+
+            return true;
+        }
+
+        return false;
     };
 
     var Key = {

@@ -3,7 +3,7 @@ $(function() {
         input,
         players = {
             blue: null,
-            red: null,
+            red: null
             //yellow: null,
             //green: null
         };

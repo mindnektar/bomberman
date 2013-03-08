@@ -133,6 +133,7 @@
     Player.prototype._checkTileCollision = function(movement) {
         var pos = this.getPositionOnMap(),
             newPos = this.getPositionOnMap(movement),
+            topModifier = 0,
             trav;
 
         if (movement.left < 0) {
@@ -151,10 +152,16 @@
                 if (movement.left > -this.skills.speed) {
                     if (!trav.topLeft && trav.bottomLeft) {
                         movement.top = movement.left + this.skills.speed;
+
+                        topModifier = 1;
                     }
 
                     if (trav.topLeft && !trav.bottomLeft) {
                         movement.top = -(movement.left + this.skills.speed);
+                    }
+
+                    if (Math.floor(this.position.top / 32) !== Math.floor((this.position.top + movement.top) / 32)) {
+                        movement.top = Math.floor(this.position.top / 32 + topModifier) * 32 - this.position.top;
                     }
                 }
             }
@@ -174,10 +181,16 @@
                 if (movement.left < this.skills.speed) {
                     if (!trav.topRight && trav.bottomRight) {
                         movement.top = movement.left + this.skills.speed;
+
+                        topModifier = 1;
                     }
 
                     if (trav.topRight && !trav.bottomRight) {
                         movement.top = -(movement.left + this.skills.speed);
+                    }
+
+                    if (Math.floor(this.position.top / 32) !== Math.floor((this.position.top + movement.top) / 32)) {
+                        movement.top = Math.floor(this.position.top / 32 + topModifier) * 32 - this.position.top;
                     }
                 }
             }
@@ -197,10 +210,16 @@
                 if (movement.top > -this.skills.speed) {
                     if (!trav.topLeft && trav.topRight) {
                         movement.left = movement.top + this.skills.speed;
+
+                        topModifier = 1;
                     }
 
                     if (trav.topLeft && !trav.topRight) {
                         movement.left = -(movement.top + this.skills.speed);
+                    }
+
+                    if (Math.floor(this.position.left / 32) !== Math.floor((this.position.left + movement.left) / 32)) {
+                        movement.left = Math.floor(this.position.left / 32 + topModifier) * 32 - this.position.left;
                     }
                 }
             }
@@ -220,10 +239,16 @@
                 if (movement.top < this.skills.speed) {
                     if (!trav.bottomLeft && trav.bottomRight) {
                         movement.left = movement.top + this.skills.speed;
+
+                        topModifier = 1;
                     }
 
                     if (trav.bottomLeft && !trav.bottomRight) {
                         movement.left = -(movement.top + this.skills.speed);
+                    }
+
+                    if (Math.floor(this.position.left / 32) !== Math.floor((this.position.left + movement.left) / 32)) {
+                        movement.left = Math.floor(this.position.left / 32 + topModifier) * 32 - this.position.left;
                     }
                 }
             }

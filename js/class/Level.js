@@ -76,6 +76,14 @@
         return detonations[left][top];
     };
 
+    Level.prototype.isItemOn = function(left, top) {
+        if (!items[left]) {
+            return null;
+        }
+
+        return items[left][top];
+    };
+
     Level.prototype.dropBomb = function(who, power, positionOnMap, onDetonation) {
         var self = this;
 
@@ -95,9 +103,26 @@
                 onDetonation && onDetonation();
             },
             function() {
-                self._removeDetonations();
+                detonations = self._dataObject();
             }
         );
+    };
+
+    Level.prototype.dropItem = function(type, left, top) {
+        var self = this;
+
+        items[left][top] = new Item(type, left, top, this,
+            function() {
+                self.removeItem(left, top);
+            }
+        );
+    };
+
+    Level.prototype.removeItem = function(left, top) {
+        if (items[left][top]) {
+            items[left][top].remove();
+            items[left][top] = null;
+        }
     };
 
     /* Private */
@@ -159,12 +184,16 @@
     Level.prototype._handleDetonation = function(left, top, type, bomb) {
         var detonation;
 
-        if (this._breakBlock(left, top)) {
+        if (this._breakBlock(left, top, bomb.who)) {
+            return null;
+        }
+
+        if (this.isItemOn(left, top)) {
+            this.removeItem(left, top);
             return null;
         }
 
         detonation = this.isDetonationOn(left, top);
-
         if (detonation && (detonation.type === type || detonation.type === 'center')) {
             return null;
         }
@@ -177,17 +206,34 @@
         return '<div class="detonation ' + type + ' ' + bomb.who + '" style="left: ' + (left * 32) + 'px; top: ' + (top * 32) + 'px;"></div>';
     };
 
-    Level.prototype._removeDetonations = function() {
-        detonations = this._dataObject();
-    };
+    Level.prototype._breakBlock = function(left, top, who) {
+        var r,
+            itemType;
 
-    Level.prototype._breakBlock = function(left, top) {
         if (this.map[top] && this.map[top][left] === 1) {
             this.map[top][left] = 0;
 
-            $('.left' + left + '.top' + top)
+            $('.tile.left' + left + '.top' + top)
                 .removeClass(tiles[1])
                 .addClass(tiles[0]);
+
+            if (who !== me) {
+                r = Math.floor(Math.random() * 100);
+
+                if (r < 10) {
+                    itemType = 'speed';
+                } else if (r < 20) {
+                    itemType = 'bombs';
+                } else if (r < 30) {
+                    itemType = 'power';
+                }
+
+                if (itemType) {
+                    this.dropItem(itemType, left, top);
+
+                    ws.emit('dropItem', {itemType: itemType, left: left, top: top});
+                }
+            }
 
             return true;
         }

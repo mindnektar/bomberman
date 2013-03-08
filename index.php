@@ -14,6 +14,7 @@ header('Content-Type: text/html; charset=utf-8');
     <script type="text/javascript" src="js/class/Level.js"></script>
     <script type="text/javascript" src="js/class/Player.js"></script>
     <script type="text/javascript" src="js/class/Bomb.js"></script>
+    <script type="text/javascript" src="js/class/Item.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
 </head>
 <body>

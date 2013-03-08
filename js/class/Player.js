@@ -6,8 +6,8 @@
         this.onDeath = onDeath;
 
         this.skills = {
-            bombs: 5,
-            power: 19,
+            bombs: 1,
+            power: 1,
             speed: 4
         };
 
@@ -58,6 +58,7 @@
         }
 
         this._checkDetonationCollision(movement);
+        this._checkItemCollision(movement);
         movement = this._checkTileCollision(movement);
 
         this.position.left += movement.left;
@@ -82,6 +83,42 @@
         this.$player
             .css(this.position)
             .css({zIndex: zIndex});
+    };
+
+    Player.prototype._checkDetonationCollision = function(movement) {
+        var self = this,
+            newPos = this.getPositionOnMap(movement),
+            detonations = {
+                topLeft: this.level.isDetonationOn(newPos.left, newPos.top),
+                topRight: this.level.isDetonationOn(newPos.right, newPos.top),
+                bottomRight: this.level.isDetonationOn(newPos.right, newPos.bottom),
+                bottomLeft: this.level.isDetonationOn(newPos.left, newPos.bottom)
+            };
+
+        $.each(detonations, function(_, detonation) {
+            if (detonation) {
+                self._kill(detonation.bomb.who);
+                return false;
+            }
+        });
+    };
+
+    Player.prototype._checkItemCollision = function(movement) {
+        var self = this,
+            newPos = this.getPositionOnMap(movement),
+            items = {
+                topLeft: this.level.isItemOn(newPos.left, newPos.top),
+                topRight: this.level.isItemOn(newPos.right, newPos.top),
+                bottomRight: this.level.isItemOn(newPos.right, newPos.bottom),
+                bottomLeft: this.level.isItemOn(newPos.left, newPos.bottom)
+            };
+
+        $.each(items, function(_, item) {
+            if (item) {
+                item.collect(self);
+                return false;
+            }
+        });
     };
 
     Player.prototype._checkTileCollision = function(movement) {
@@ -184,24 +221,6 @@
         }
 
         return movement;
-    };
-
-    Player.prototype._checkDetonationCollision = function(movement) {
-        var self = this,
-            newPos = this.getPositionOnMap(movement),
-            detonations = {
-                topLeft: this.level.isDetonationOn(newPos.left, newPos.top),
-                topRight: this.level.isDetonationOn(newPos.right, newPos.top),
-                bottomRight: this.level.isDetonationOn(newPos.right, newPos.bottom),
-                bottomLeft: this.level.isDetonationOn(newPos.left, newPos.bottom)
-            };
-
-        $.each(detonations, function(_, bomb) {
-            if (bomb) {
-                self._kill(bomb.who);
-                return false;
-            }
-        });
     };
 
     Player.prototype._kill = function(who) {

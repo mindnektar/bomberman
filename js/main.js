@@ -1,8 +1,5 @@
 $(function() {
-    var me = location.href.split('?')[1],
-
-        ws,
-        level,
+    var level,
         input,
         players = {
             blue: null,
@@ -10,9 +7,13 @@ $(function() {
         };
 
     (function init() {
+        me = location.href.split('?')[1];
+
         ws = $.socketio(me, {
             position: position,
             dropBomb: dropBomb,
+            dropItem: dropItem,
+            collectItem: collectItem,
             die: function(data) {
                 if (data.who === me) {
                     return;
@@ -74,6 +75,22 @@ $(function() {
         }
 
         level.dropBomb(data.who, players[data.who].skills.power, data.position);
+    }
+
+    function dropItem(data) {
+        if (data.who === me) {
+            return;
+        }
+
+        level.dropItem(data.itemType, data.left, data.top);
+    }
+
+    function collectItem(data) {
+        if (data.who === me) {
+            return;
+        }
+
+        level.removeItem(data.left, data.top);
     }
 
     function onDeath(who) {

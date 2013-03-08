@@ -27,7 +27,7 @@
         return this.position;
     };
 
-    Player.prototype.getPositionOnMap = function(modifier) {
+    Player.prototype.getPositionOnMap = function(modifier, coll) {
         if (!modifier) {
             modifier = {
                 left: 0,
@@ -35,11 +35,13 @@
             };
         }
 
+        coll = coll || collision;
+
         return {
-            left: Math.floor((this.position.left + collision.left + modifier.left) / 32),
-            right: Math.floor((this.position.left + collision.left + collision.width + modifier.left) / 32),
-            top: Math.floor((this.position.top + collision.top + modifier.top) / 32),
-            bottom: Math.floor((this.position.top + collision.top + collision.height + modifier.top) / 32)
+            left: Math.floor((this.position.left + coll.left + modifier.left) / 32),
+            right: Math.floor((this.position.left + coll.left + coll.width + modifier.left) / 32),
+            top: Math.floor((this.position.top + coll.top + modifier.top) / 32),
+            bottom: Math.floor((this.position.top + coll.top + coll.height + modifier.top) / 32)
         };
     };
 
@@ -87,7 +89,13 @@
 
     Player.prototype._checkDetonationCollision = function(movement) {
         var self = this,
-            newPos = this.getPositionOnMap(movement),
+            coll = {
+                left: 8,
+                top: 40,
+                width: 16,
+                height: 16
+            },
+            newPos = this.getPositionOnMap(movement, coll),
             detonations = {
                 topLeft: this.level.isDetonationOn(newPos.left, newPos.top),
                 topRight: this.level.isDetonationOn(newPos.right, newPos.top),

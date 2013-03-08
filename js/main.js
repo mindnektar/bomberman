@@ -4,8 +4,8 @@ $(function() {
         players = {
             blue: null,
             red: null,
-            yellow: null,
-            green: null
+            //yellow: null,
+            //green: null
         };
 
     (function init() {

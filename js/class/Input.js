@@ -59,9 +59,19 @@
         if (pressed[Key.BOMB]) {
             pressed[Key.BOMB] = false;
 
-            this.secondPress = lastPress[Key.BOMB] && new Date() - lastPress[Key.BOMB] <= 400;
+            this.secondPress = lastPress[Key.BOMB] && new Date() - lastPress[Key.BOMB] <= 200;
 
             lastPress[Key.BOMB] = !this.secondPress ? new Date() : 0;
+
+            return true;
+        }
+
+        return false;
+    };
+
+    Input.prototype.hitSpecialKey = function() {
+        if (pressed[Key.SPECIAL]) {
+            pressed[Key.SPECIAL] = false;
 
             return true;
         }
@@ -74,7 +84,8 @@
             RIGHT: 68,
             DOWN: 83,
             LEFT: 65,
-            BOMB: 79
+            BOMB: 75,
+            SPECIAL: 79
         },
 
         moveMap = {},

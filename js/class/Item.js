@@ -24,6 +24,7 @@
                 break;
 
             case 'line':
+            case 'time':
                 player.skills[this.type] = true;
                 break;
         }
@@ -41,6 +42,7 @@
         bombs: 'B',
         power: 'P',
         speed: 'S',
-        line: 'L'
+        line: 'L',
+        time: 'T'
     }
 })(jQuery);

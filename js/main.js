@@ -50,10 +50,16 @@ $(function() {
         }
 
         if (input.bombDropped()) {
-            if (input.secondPress) {
+            if (input.secondPress && players[me].skills.line) {
                 players[me].dropLine();
             } else {
                 players[me].dropBomb();
+            }
+        }
+
+        if (input.hitSpecialKey()) {
+            if (players[me].skills.time) {
+                level.detonateBombsBy(me);
             }
         }
     }

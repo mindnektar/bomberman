@@ -84,12 +84,11 @@
         return items[left][top];
     };
 
-    Level.prototype.dropBomb = function(who, power, positionOnMap, onDetonation) {
+    Level.prototype.dropBomb = function(player, positionOnMap, onDetonation) {
         var self = this;
 
         bombs[positionOnMap.left][positionOnMap.top] = new Bomb(
-            who,
-            power,
+            player,
             {
                 left: positionOnMap.left * 32,
                 top: positionOnMap.top * 32
@@ -110,6 +109,16 @@
         if (detonations[positionOnMap.left][positionOnMap.top]) {
             bombs[positionOnMap.left][positionOnMap.top].detonate();
         }
+    };
+
+    Level.prototype.detonateBombsBy = function(who) {
+        $.each(bombs, function(_, row) {
+            $.each(row, function(_, bomb) {
+                if (bomb && bomb.who === who) {
+                    bomb.detonate();
+                }
+            });
+        });
     };
 
     Level.prototype.dropItem = function(type, left, top) {
@@ -233,6 +242,8 @@
                     itemType = 'power';
                 } else if (r < 35) {
                     itemType = 'line';
+                } else if (r < 38) {
+                    itemType = 'time';
                 }
 
                 if (itemType) {

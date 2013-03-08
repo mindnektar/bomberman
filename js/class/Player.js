@@ -1,7 +1,8 @@
 (function($) {
-    Player = function(player, level, onDeath) {
-        this.$player = $('<div id="' + player + '" class="player"></div>');
+    Player = function(who, level, onDeath) {
+        this.$player = $('<div id="' + who + '" class="player"></div>');
 
+        this.who = who;
         this.level = level;
         this.onDeath = onDeath;
 
@@ -14,7 +15,8 @@
             bombs: 20,
             power: 8,
             speed: 4,
-            line: true
+            line: true,
+            time: true
         };
 
         this.score = {
@@ -92,7 +94,7 @@
             return;
         }
 
-        this.level.dropBomb(me, this.skills.power, centerPositionOnMap, function() {
+        this.level.dropBomb(this, centerPositionOnMap, function() {
             self.skills.bombs++;
         });
 
@@ -123,7 +125,7 @@
                 break;
             }
 
-            this.level.dropBomb(me, this.skills.power, {left: left, top: top}, function() {
+            this.level.dropBomb(this, {left: left, top: top}, function() {
                 self.skills.bombs++;
             });
 

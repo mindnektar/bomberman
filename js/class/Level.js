@@ -231,6 +231,8 @@
                     itemType = 'bombs';
                 } else if (r < 30) {
                     itemType = 'power';
+                } else if (r < 35) {
+                    itemType = 'line';
                 }
 
                 if (itemType) {

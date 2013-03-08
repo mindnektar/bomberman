@@ -22,6 +22,10 @@
             case 'speed':
                 player.skills[this.type]++;
                 break;
+
+            case 'line':
+                player.skills[this.type] = true;
+                break;
         }
 
         this.remove();
@@ -36,6 +40,7 @@
     var contentByType = {
         bombs: 'B',
         power: 'P',
-        speed: 'S'
+        speed: 'S',
+        line: 'L'
     }
 })(jQuery);

@@ -2,6 +2,7 @@ $(function() {
     var level,
         input,
         score,
+        timer,
         players = {
             blue: null,
             red: null,
@@ -32,6 +33,9 @@ $(function() {
         level.build('empty', players);
 
         score = new Score(players);
+
+        timer = $.timer();
+        timer.start();
 
         setInterval(frame, 40);
     })();
@@ -112,5 +116,6 @@ $(function() {
 
     function onDeath(data) {
         score.adjustKills(players[data.killer], data.suicide ? -1 : 1);
+        score.removePlayer(data.who);
     }
 });

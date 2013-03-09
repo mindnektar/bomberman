@@ -174,7 +174,7 @@
             if (detonation) {
                 self.die();
 
-                killData = {killer: detonation.bomb.who, suicide: detonation.bomb.who === me};
+                killData = {who: me, killer: detonation.bomb.who, suicide: detonation.bomb.who === me};
 
                 self.onDeath && self.onDeath(killData);
 

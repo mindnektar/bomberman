@@ -22,4 +22,8 @@
 
         $('.' + player.who + ' .kills span', this.$scoreboard).text(player.score.kills);
     };
+
+    Score.prototype.removePlayer = function(who) {
+        $('.' + who, this.$scoreboard).addClass('dead');
+    }
 })(jQuery);

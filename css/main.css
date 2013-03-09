@@ -1,5 +1,7 @@
 body {
     background: #333;
+    color: #fff;
+    font-family: sans-serif;
 }
 
 .wrapper {
@@ -27,8 +29,7 @@ body {
 }
 
 #scoreboard {
-    color: #fff;
-    font-family: sans-serif;
+    float: left;
     font-size: 9px;
     padding: 7px;
 }
@@ -43,6 +44,10 @@ body {
 
 #scoreboard p {
     margin: 0;
+}
+
+#scoreboard .dead p {
+    opacity: 0.3;
 }
 
 #scoreboard .name {
@@ -63,6 +68,20 @@ body {
 
 #scoreboard .green .name {
     color: #090;
+}
+
+#timer {
+    float: right;
+    font-size: 24px;
+    height: 48px;
+    line-height: 48px;
+    margin-right: 16px;
+    text-align: right;
+    width: 128px;
+}
+
+#timer.warning {
+    color: #f00;
 }
 
 #level {
@@ -167,7 +186,6 @@ body {
     border-radius: 8px;
     box-shadow: -2px -2px 5px rgba(0,0,0,0.5) inset, 2px 2px 5px rgba(255,255,255,0.5) inset;
     color: #888;
-    font-family: sans-serif;
     font-size: 24px;
     font-weight: bold;
     height: 32px;

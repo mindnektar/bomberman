@@ -12,6 +12,7 @@ header('Content-Type: text/html; charset=utf-8');
     <script type="text/javascript" src="js/plugins/socketio/jquery.socketio.js"></script>
     <script type="text/javascript" src="js/class/Input.js"></script>
     <script type="text/javascript" src="js/class/Level.js"></script>
+    <script type="text/javascript" src="js/class/Score.js"></script>
     <script type="text/javascript" src="js/class/Player.js"></script>
     <script type="text/javascript" src="js/class/Bomb.js"></script>
     <script type="text/javascript" src="js/class/Item.js"></script>
@@ -20,6 +21,10 @@ header('Content-Type: text/html; charset=utf-8');
 <body>
 
 <div class="wrapper">
+    <div id="infobar">
+        <div id="scoreboard"></div>
+    </div>
+
     <div id="level"></div>
 </div>
 

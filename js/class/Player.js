@@ -6,6 +6,8 @@
         this.level = level;
         this.onDeath = onDeath;
 
+        this.name = who;
+
         this.facing = {
             left: 0,
             top: 1
@@ -165,11 +167,18 @@
                 topRight: this.level.isDetonationOn(newPos.right, newPos.top),
                 bottomRight: this.level.isDetonationOn(newPos.right, newPos.bottom),
                 bottomLeft: this.level.isDetonationOn(newPos.left, newPos.bottom)
-            };
+            },
+            killData;
 
         $.each(detonations, function(_, detonation) {
             if (detonation) {
-                self._kill(detonation.bomb.who);
+                self.die();
+
+                killData = {killer: detonation.bomb.who, suicide: detonation.bomb.who === me};
+
+                self.onDeath && self.onDeath(killData);
+
+                ws.emit('die', killData);
                 return false;
             }
         });
@@ -319,12 +328,6 @@
         }
 
         return movement;
-    };
-
-    Player.prototype._kill = function(who) {
-        this.die();
-
-        this.onDeath && this.onDeath(who);
     };
 
     var collision = {

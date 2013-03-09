@@ -1,11 +1,12 @@
 $(function() {
     var level,
         input,
+        score,
         players = {
             blue: null,
-            red: null
-            //yellow: null,
-            //green: null
+            red: null,
+            yellow: null,
+            green: null
         };
 
     (function init() {
@@ -14,17 +15,10 @@ $(function() {
         ws = $.socketio(me, {
             position: position,
             dropBomb: dropBomb,
+            detonateAll: detonateAll,
             dropItem: dropItem,
             collectItem: collectItem,
-            die: function(data) {
-                if (data.who === me) {
-                    return;
-                }
-
-                players[data.who].die();
-
-                players[data.killer].score.kills++;
-            }
+            die: die
         });
 
         input = new Input();
@@ -36,6 +30,8 @@ $(function() {
         });
 
         level.build('empty', players);
+
+        score = new Score(players);
 
         setInterval(frame, 40);
     })();
@@ -60,6 +56,7 @@ $(function() {
         if (input.hitSpecialKey()) {
             if (players[me].skills.time) {
                 level.detonateBombsBy(me);
+                ws.emit('detonateAll');
             }
         }
     }
@@ -77,7 +74,15 @@ $(function() {
             return;
         }
 
-        level.dropBomb(data.who, players[data.who].skills.power, data.position);
+        level.dropBomb(players[data.who], data.position);
+    }
+
+    function detonateAll(data) {
+        if (data.who === me) {
+            return;
+        }
+
+        level.detonateBombsBy(data.who);
     }
 
     function dropItem(data) {
@@ -96,8 +101,16 @@ $(function() {
         level.collectItem(players[data.who], data.left, data.top);
     }
 
-    function onDeath(who) {
-        players[who].score.kills++;
-        ws.emit('die', {killer: who});
+    function die(data) {
+        if (data.who === me) {
+            return;
+        }
+
+        players[data.who].die();
+        onDeath(data);
+    }
+
+    function onDeath(data) {
+        score.adjustKills(players[data.killer], data.suicide ? -1 : 1);
     }
 });

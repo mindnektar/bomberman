@@ -7,7 +7,11 @@ $(function() {
             blue: null,
             red: null,
             yellow: null,
-            green: null
+            green: null,
+            orange: null,
+            pink: null,
+            purple: null,
+            darkblue: null
         };
 
     (function init() {
@@ -34,7 +38,11 @@ $(function() {
 
         score = new Score(players);
 
-        timer = $.timer();
+        timer = $.timer({
+            timeOver: function() {
+                level.suddenDeath(players);
+            }
+        });
         timer.start();
 
         setInterval(frame, 40);
@@ -110,12 +118,14 @@ $(function() {
             return;
         }
 
-        players[data.who].die();
-        onDeath(data);
+        players[data.who].die(data);
     }
 
     function onDeath(data) {
-        score.adjustKills(players[data.killer], data.suicide ? -1 : 1);
+        if (data.killer) {
+            score.adjustKills(players[data.killer], data.who === data.killer ? -1 : 1);
+        }
+
         score.removePlayer(data.who);
     }
 });

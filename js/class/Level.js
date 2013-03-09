@@ -34,7 +34,7 @@
         for (i in this.map) {
             for (j in this.map[i]) {
                 if (!this.map[i][j]) {
-                    //this.map[i][j] = 1;
+                    this.map[i][j] = 1;
 
                     for (k in startPositions) {
                         if ((Math.abs(startPositions[k].left - j) <= 1 && startPositions[k].top == i) ||
@@ -135,6 +135,68 @@
             items[left][top].collect(player);
             items[left][top] = null;
         }
+    };
+
+    Level.prototype.suddenDeath = function(players) {
+        var self = this,
+            bounds = [
+                {start: 1, end: 15},
+                {start: 2, end: 11}
+            ],
+            i;
+
+        function iteration(left, top, axis, direction) {
+            self.map[top][left] = 2;
+
+            $('.tile.left' + left + '.top' + top)
+                .removeClass(tiles.join(' '))
+                .addClass(tiles[2]);
+
+            i = 0;
+            $.each(players, function(_, player) {
+                var positionOnMap = player.getCenterPositionOnMap();
+
+                if (positionOnMap.left === left && positionOnMap.top === top) {
+                    player.die({});
+                }
+
+                if (!player.dead) {
+                    i++;
+                }
+            });
+
+            if (i <= 1) {
+                return;
+            }
+
+            if (axis === 1) {
+                top += direction;
+            } else {
+                left += direction
+            }
+
+            if (axis === 0 && direction === 1 && left === bounds[0].end) {
+                bounds[0].end--;
+                axis = 1;
+            } else if (axis === 1 && direction === 1 && top === bounds[1].end) {
+                bounds[1].end--;
+                axis = 0;
+                direction = -1;
+            } else if (axis === 0 && direction === -1 && left === bounds[0].start) {
+                bounds[0].start++;
+                axis = 1;
+            } else if (axis === 1 && direction === -1 && top === bounds[1].start) {
+                bounds[1].start++;
+                axis = 0;
+                direction = 1;
+            }
+
+            setTimeout(function() {
+                iteration(left, top, axis, direction);
+            }, 250);
+        }
+
+        iteration(1, 1, 0, 1);
     };
 
     /* Private */
@@ -274,17 +336,21 @@
         detonations,
         items,
 
-        tiles = {
-            0: 'empty',
-            1: 'breakable',
-            2: 'fixed'
-        },
+        tiles = [
+            'empty',
+            'breakable',
+            'fixed'
+        ],
 
         startPositions = [
             {left: 1, top: 1},
             {left: 15, top: 11},
             {left: 15, top: 1},
-            {left: 1, top: 11}
+            {left: 1, top: 11},
+            {left: 5, top: 3},
+            {left: 11, top: 9},
+            {left: 11, top: 3},
+            {left: 5, top: 9}
         ],
 
         maps = {

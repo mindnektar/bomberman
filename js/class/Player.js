@@ -137,8 +137,11 @@
         }
     };
 
-    Player.prototype.die = function() {
+    Player.prototype.die = function(data) {
         this.$player.fadeOut(1000);
+
+        data.who = this.who;
+        this.onDeath && this.onDeath(data);
 
         this.dead = true;
     };
@@ -172,11 +175,9 @@
 
         $.each(detonations, function(_, detonation) {
             if (detonation) {
-                self.die();
+                killData = {killer: detonation.bomb.who};
 
-                killData = {who: me, killer: detonation.bomb.who, suicide: detonation.bomb.who === me};
-
-                self.onDeath && self.onDeath(killData);
+                self.die(killData);
 
                 ws.emit('die', killData);
                 return false;

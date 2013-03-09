@@ -55,7 +55,7 @@ body {
 }
 
 #scoreboard .blue .name {
-    color: #09f;
+    color: #0cf;
 }
 
 #scoreboard .red .name {
@@ -70,6 +70,22 @@ body {
     color: #090;
 }
 
+#scoreboard .orange .name {
+    color: #f80;
+}
+
+#scoreboard .pink .name {
+    color: #f0f;
+}
+
+#scoreboard .purple .name {
+    color: #60f;
+}
+
+#scoreboard .darkblue .name {
+    color: #06a;
+}
+
 #timer {
     float: right;
     font-size: 24px;
@@ -77,7 +93,6 @@ body {
     line-height: 48px;
     margin-right: 16px;
     text-align: right;
-    width: 128px;
 }
 
 #timer.warning {
@@ -118,7 +133,7 @@ body {
 }
 
 #blue {
-    background: #09f;
+    background: #0cf;
 }
 
 #red {
@@ -133,6 +148,22 @@ body {
     background: #090;
 }
 
+#orange {
+    background: #f80;
+}
+
+#pink {
+    background: #f0f;
+}
+
+#purple {
+    background: #60f;
+}
+
+#darkblue {
+    background: #06a;
+}
+
 .bomb {
     border-radius: 16px;
     box-shadow: -2px -2px 5px rgba(0,0,0,0.5) inset, 2px 2px 5px rgba(255,255,255,0.5) inset;
@@ -142,7 +173,7 @@ body {
 }
 
 .bomb.blue {
-    background: #09f;
+    background: #0cf;
 }
 
 .bomb.red {
@@ -157,6 +188,22 @@ body {
     background: #090;
 }
 
+.bomb.orange {
+    background: #f80;
+}
+
+.bomb.pink {
+    background: #f0f;
+}
+
+.bomb.purple {
+    background: #60f;
+}
+
+.bomb.darkblue {
+    background: #06a;
+}
+
 .detonation {
     box-shadow: -2px -2px 5px rgba(0,0,0,0.5) inset, 2px 2px 5px rgba(255,255,255,0.5) inset;
     height: 32px;
@@ -166,7 +213,7 @@ body {
 }
 
 .detonation.blue {
-    background: #09f;
+    background: #0cf;
 }
 
 .detonation.red {
@@ -179,6 +226,22 @@ body {
 
 .detonation.green {
     background: #090;
+}
+
+.detonation.orange {
+    background: #f80;
+}
+
+.detonation.pink {
+    background: #f0f;
+}
+
+.detonation.purple {
+    background: #60f;
+}
+
+.detonation.darkblue {
+    background: #06a;
 }
 
 .item {

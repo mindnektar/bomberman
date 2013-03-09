@@ -3,6 +3,7 @@
         var html = '';
 
         this.$scoreboard = $('#scoreboard');
+        this.remainingPlayers = 0;
 
         $.each(players, function(who, player) {
             html += '\
@@ -12,6 +13,8 @@
                     <p class="kills">Kills: <span>0</span></p>\
                 </div>\
             ';
+
+            this.remainingPlayers++;
         });
 
         this.$scoreboard.html(html);
@@ -25,5 +28,11 @@
 
     Score.prototype.removePlayer = function(who) {
         $('.' + who, this.$scoreboard).addClass('dead');
-    }
+
+        this.remainingPlayers--;
+
+        if (this.remainingPlayers === 1) {
+
+        }
+    };
 })(jQuery);

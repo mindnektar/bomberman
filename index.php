@@ -8,7 +8,7 @@ header('Content-Type: text/html; charset=utf-8');
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="css/main.css" />
     <script type="text/javascript" src="js/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>
-    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.js"></script>
     <script type="text/javascript" src="js/plugins/socketio/jquery.socketio.js"></script>
     <script type="text/javascript" src="js/plugins/timer/jquery.timer.js"></script>
     <script type="text/javascript" src="js/class/Input.js"></script>

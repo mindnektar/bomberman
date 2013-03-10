@@ -40,7 +40,7 @@ $(function() {
 
         timer = $.timer({
             timeOver: function() {
-                level.suddenDeath(players);
+                level.suddenDeath();
             }
         });
         timer.start();

@@ -13,6 +13,7 @@
             k = 0;
 
         this.map = maps[name];
+        this.players = players;
 
         this.$level
             .height(this.map.length * 32)
@@ -84,6 +85,16 @@
         return items[left][top];
     };
 
+    Level.prototype.getPlayersOn = function(left, top) {
+        return $.map(this.players, function(player) {
+            var positionOnMap = player.getCenterPositionOnMap();
+
+            if (positionOnMap.left === left && positionOnMap.top === top) {
+                return player;
+            }
+        });
+    };
+
     Level.prototype.dropBomb = function(player, positionOnMap, onDetonation) {
         var self = this;
 
@@ -137,7 +148,7 @@
         }
     };
 
-    Level.prototype.suddenDeath = function(players) {
+    Level.prototype.suddenDeath = function() {
         var self = this,
             bounds = [
                 {start: 1, end: 15},
@@ -153,7 +164,7 @@
                 .addClass(tiles[2]);
 
             i = 0;
-            $.each(players, function(_, player) {
+            $.each(this.players, function(_, player) {
                 var positionOnMap = player.getCenterPositionOnMap();
 
                 if (positionOnMap.left === left && positionOnMap.top === top) {

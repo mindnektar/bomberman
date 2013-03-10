@@ -119,11 +119,7 @@
             left = centerPositionOnMap.left + i * this.facing.left;
             top = centerPositionOnMap.top + i * this.facing.top;
 
-            if (!this.skills.bombs) {
-                break;
-            }
-
-            if (!this.level.isTraversable(left, top)) {
+            if (!this.skills.bombs || !this.level.isTraversable(left, top) || this.level.getPlayersOn(left, top).length) {
                 break;
             }
 

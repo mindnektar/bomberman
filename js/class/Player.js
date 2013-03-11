@@ -1,14 +1,24 @@
 (function($) {
-    Player = function(player, level, onDeath) {
-        this.$player = $('<div id="' + player + '" class="player"></div>');
+    Player = function(who, level, onDeath) {
+        this.$player = $('<div id="' + who + '" class="player"></div>');
 
+        this.who = who;
         this.level = level;
         this.onDeath = onDeath;
 
+        this.name = who;
+
+        this.facing = {
+            left: 0,
+            top: 1
+        };
+
         this.skills = {
-            bombs: 1,
-            power: 1,
-            speed: 4
+            bombs: 20,
+            power: 8,
+            speed: 4,
+            line: true,
+            time: true
         };
 
         this.score = {
@@ -59,6 +69,13 @@
             return this.position;
         }
 
+        if (movement.left || movement.top) {
+            this.facing = {
+                left: movement.left ? movement.left / Math.abs(movement.left) : 0,
+                top: movement.top ? movement.top / Math.abs(movement.top) : 0
+            };
+        }
+
         this._checkDetonationCollision(movement);
         this._checkItemCollision(movement);
         movement = this._checkTileCollision(movement);
@@ -71,8 +88,56 @@
         return this.position;
     };
 
-    Player.prototype.die = function() {
+    Player.prototype.dropBomb = function() {
+        var self = this,
+            centerPositionOnMap = this.getCenterPositionOnMap();
+
+        if (this.level.isBombOn(centerPositionOnMap.left, centerPositionOnMap.top) || !this.skills.bombs) {
+            return;
+        }
+
+        this.level.dropBomb(this, centerPositionOnMap, function() {
+            self.skills.bombs++;
+        });
+
+        this.skills.bombs--;
+
+        ws.emit('dropBomb', {position: centerPositionOnMap});
+    };
+
+    Player.prototype.dropLine = function() {
+        var self = this,
+            centerPositionOnMap = this.getCenterPositionOnMap(),
+            i,
+            end,
+            left,
+            top;
+
+        end = this.skills.bombs;
+
+        for (i = 1; i <= end; i++) {
+            left = centerPositionOnMap.left + i * this.facing.left;
+            top = centerPositionOnMap.top + i * this.facing.top;
+
+            if (!this.skills.bombs || !this.level.isTraversable(left, top) || this.level.getPlayersOn(left, top).length) {
+                break;
+            }
+
+            this.level.dropBomb(this, {left: left, top: top}, function() {
+                self.skills.bombs++;
+            });
+
+            this.skills.bombs--;
+
+            ws.emit('dropBomb', {position: {left: left, top: top}});
+        }
+    };
+
+    Player.prototype.die = function(data) {
         this.$player.fadeOut(1000);
+
+        data.who = this.who;
+        this.onDeath && this.onDeath(data);
 
         this.dead = true;
     };
@@ -101,11 +166,16 @@
                 topRight: this.level.isDetonationOn(newPos.right, newPos.top),
                 bottomRight: this.level.isDetonationOn(newPos.right, newPos.bottom),
                 bottomLeft: this.level.isDetonationOn(newPos.left, newPos.bottom)
-            };
+            },
+            killData;
 
         $.each(detonations, function(_, detonation) {
             if (detonation) {
-                self._kill(detonation.bomb.who);
+                killData = {killer: detonation.bomb.who};
+
+                self.die(killData);
+
+                ws.emit('die', killData);
                 return false;
             }
         });
@@ -255,12 +325,6 @@
         }
 
         return movement;
-    };
-
-    Player.prototype._kill = function(who) {
-        this.die();
-
-        this.onDeath && this.onDeath(who);
     };
 
     var collision = {

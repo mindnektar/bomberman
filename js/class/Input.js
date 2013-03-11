@@ -1,9 +1,13 @@
 (function($, undefined) {
     Input = function() {
+        var self = this;
+
         moveMap[Key.UP] = [0, -1];
         moveMap[Key.RIGHT] = [1, 0];
         moveMap[Key.DOWN] = [0, 1];
         moveMap[Key.LEFT] = [-1, 0];
+
+        this.secondPress = false;
 
         $(window)
             .keydown(function(e) {
@@ -55,6 +59,20 @@
         if (pressed[Key.BOMB]) {
             pressed[Key.BOMB] = false;
 
+            this.secondPress = lastPress[Key.BOMB] && new Date() - lastPress[Key.BOMB] <= 200;
+
+            lastPress[Key.BOMB] = !this.secondPress ? new Date() : 0;
+
+            return true;
+        }
+
+        return false;
+    };
+
+    Input.prototype.hitSpecialKey = function() {
+        if (pressed[Key.SPECIAL]) {
+            pressed[Key.SPECIAL] = false;
+
             return true;
         }
 
@@ -66,11 +84,13 @@
             RIGHT: 68,
             DOWN: 83,
             LEFT: 65,
-            BOMB: 79
+            BOMB: 75,
+            SPECIAL: 79
         },
 
         moveMap = {},
         pressed = {},
+        lastPress = {},
         direction = [];
 
 })(jQuery);

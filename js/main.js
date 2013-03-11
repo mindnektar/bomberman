@@ -1,11 +1,17 @@
 $(function() {
     var level,
         input,
+        score,
+        timer,
         players = {
             blue: null,
-            red: null
-            //yellow: null,
-            //green: null
+            red: null,
+            yellow: null,
+            green: null,
+            orange: null,
+            pink: null,
+            purple: null,
+            darkblue: null
         };
 
     (function init() {
@@ -14,17 +20,10 @@ $(function() {
         ws = $.socketio(me, {
             position: position,
             dropBomb: dropBomb,
+            detonateAll: detonateAll,
             dropItem: dropItem,
             collectItem: collectItem,
-            die: function(data) {
-                if (data.who === me) {
-                    return;
-                }
-
-                players[data.who].die();
-
-                players[data.killer].score.kills++;
-            }
+            die: die
         });
 
         input = new Input();
@@ -37,30 +36,41 @@ $(function() {
 
         level.build('empty', players);
 
+        score = new Score(players);
+
+        timer = $.timer({
+            timeOver: function() {
+                level.suddenDeath();
+            }
+        });
+        timer.start();
+
         setInterval(frame, 40);
     })();
 
     function frame() {
-        var movement = input.getMovement(players[me].skills.speed),
-            newPosition = players[me].move(movement),
-            centerPositionOnMap = players[me].getCenterPositionOnMap();
+        var movement = input.getMovement(players[me].skills.speed);
+
+        ws.emit('position', {position: players[me].move(movement)});
 
         if (players[me].dead) {
             return;
         }
 
-        if (input.bombDropped() && !level.isBombOn(centerPositionOnMap.left, centerPositionOnMap.top) && players[me].skills.bombs) {
-
-            players[me].skills.bombs--;
-
-            level.dropBomb(me, players[me].skills.power, centerPositionOnMap, function() {
-                players[me].skills.bombs++;
-            });
-
-            ws.emit('dropBomb', {position: centerPositionOnMap});
+        if (input.bombDropped()) {
+            if (input.secondPress && players[me].skills.line) {
+                players[me].dropLine();
+            } else {
+                players[me].dropBomb();
+            }
         }
 
-        ws.emit('position', {position: newPosition});
+        if (input.hitSpecialKey()) {
+            if (players[me].skills.time) {
+                level.detonateBombsBy(me);
+                ws.emit('detonateAll');
+            }
+        }
     }
 
     function position(data) {
@@ -76,7 +86,15 @@ $(function() {
             return;
         }
 
-        level.dropBomb(data.who, players[data.who].skills.power, data.position);
+        level.dropBomb(players[data.who], data.position);
+    }
+
+    function detonateAll(data) {
+        if (data.who === me) {
+            return;
+        }
+
+        level.detonateBombsBy(data.who);
     }
 
     function dropItem(data) {
@@ -95,8 +113,19 @@ $(function() {
         level.collectItem(players[data.who], data.left, data.top);
     }
 
-    function onDeath(who) {
-        players[who].score.kills++;
-        ws.emit('die', {killer: who});
+    function die(data) {
+        if (data.who === me) {
+            return;
+        }
+
+        players[data.who].die(data);
+    }
+
+    function onDeath(data) {
+        if (data.killer) {
+            score.adjustKills(players[data.killer], data.who === data.killer ? -1 : 1);
+        }
+
+        score.removePlayer(data.who);
     }
 });

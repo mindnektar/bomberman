@@ -13,6 +13,7 @@
             k = 0;
 
         this.map = maps[name];
+        this.players = players;
 
         this.$level
             .height(this.map.length * 32)
@@ -84,12 +85,21 @@
         return items[left][top];
     };
 
-    Level.prototype.dropBomb = function(who, power, positionOnMap, onDetonation) {
+    Level.prototype.getPlayersOn = function(left, top) {
+        return $.map(this.players, function(player) {
+            var positionOnMap = player.getCenterPositionOnMap();
+
+            if (positionOnMap.left === left && positionOnMap.top === top) {
+                return player;
+            }
+        });
+    };
+
+    Level.prototype.dropBomb = function(player, positionOnMap, onDetonation) {
         var self = this;
 
         bombs[positionOnMap.left][positionOnMap.top] = new Bomb(
-            who,
-            power,
+            player,
             {
                 left: positionOnMap.left * 32,
                 top: positionOnMap.top * 32
@@ -106,6 +116,20 @@
                 detonations = self._dataObject();
             }
         );
+
+        if (detonations[positionOnMap.left][positionOnMap.top]) {
+            bombs[positionOnMap.left][positionOnMap.top].detonate();
+        }
+    };
+
+    Level.prototype.detonateBombsBy = function(who) {
+        $.each(bombs, function(_, row) {
+            $.each(row, function(_, bomb) {
+                if (bomb && bomb.who === who) {
+                    bomb.detonate();
+                }
+            });
+        });
     };
 
     Level.prototype.dropItem = function(type, left, top) {
@@ -122,6 +146,68 @@
             items[left][top].collect(player);
             items[left][top] = null;
         }
+    };
+
+    Level.prototype.suddenDeath = function() {
+        var self = this,
+            bounds = [
+                {start: 1, end: 15},
+                {start: 2, end: 11}
+            ],
+            i;
+
+        function iteration(left, top, axis, direction) {
+            self.map[top][left] = 2;
+
+            $('.tile.left' + left + '.top' + top)
+                .removeClass(tiles.join(' '))
+                .addClass(tiles[2]);
+
+            i = 0;
+            $.each(this.players, function(_, player) {
+                var positionOnMap = player.getCenterPositionOnMap();
+
+                if (positionOnMap.left === left && positionOnMap.top === top) {
+                    player.die({});
+                }
+
+                if (!player.dead) {
+                    i++;
+                }
+            });
+
+            if (i <= 1) {
+                return;
+            }
+
+            if (axis === 1) {
+                top += direction;
+            } else {
+                left += direction
+            }
+
+            if (axis === 0 && direction === 1 && left === bounds[0].end) {
+                bounds[0].end--;
+                axis = 1;
+            } else if (axis === 1 && direction === 1 && top === bounds[1].end) {
+                bounds[1].end--;
+                axis = 0;
+                direction = -1;
+            } else if (axis === 0 && direction === -1 && left === bounds[0].start) {
+                bounds[0].start++;
+                axis = 1;
+            } else if (axis === 1 && direction === -1 && top === bounds[1].start) {
+                bounds[1].start++;
+                axis = 0;
+                direction = 1;
+            }
+
+            setTimeout(function() {
+                iteration(left, top, axis, direction);
+            }, 250);
+        }
+
+        iteration(1, 1, 0, 1);
     };
 
     /* Private */
@@ -227,6 +313,10 @@
                     itemType = 'bombs';
                 } else if (r < 30) {
                     itemType = 'power';
+                } else if (r < 35) {
+                    itemType = 'line';
+                } else if (r < 38) {
+                    itemType = 'time';
                 }
 
                 if (itemType) {
@@ -257,53 +347,51 @@
         detonations,
         items,
 
-        tiles = {
-            0: 'empty',
-            1: 'breakable',
-            2: 'fixed'
-        },
+        tiles = [
+            'empty',
+            'breakable',
+            'fixed'
+        ],
 
         startPositions = [
-            {left: 0, top: 0},
-            {left: 18, top: 14},
-            {left: 18, top: 0},
-            {left: 0, top: 14}
+            {left: 1, top: 1},
+            {left: 15, top: 11},
+            {left: 15, top: 1},
+            {left: 1, top: 11},
+            {left: 5, top: 3},
+            {left: 11, top: 9},
+            {left: 11, top: 3},
+            {left: 5, top: 9}
         ],
 
         maps = {
             empty: [
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+                [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
             ],
             standard: [
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             ]
         };
 })(jQuery);

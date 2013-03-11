@@ -164,7 +164,7 @@
                 .addClass(tiles[2]);
 
             i = 0;
-            $.each(this.players, function(_, player) {
+            $.each(self.players, function(_, player) {
                 var positionOnMap = player.getCenterPositionOnMap();
 
                 if (positionOnMap.left === left && positionOnMap.top === top) {
